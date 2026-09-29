@@ -147,7 +147,9 @@ def shortlist(role_id: uuid.UUID, *, include_excluded: bool = False) -> list[dic
             "select m.id as match_id, m.candidate_id, c.display_name, c.primary_location_text, "
             "       m.score, m.components_json, m.gates_json, m.scorer_version, m.weights_version, "
             "       (select action from recruiter_action a where a.match_id = m.id "
-            "        order by a.created_at desc limit 1) as last_action "
+            "        order by a.created_at desc limit 1) as last_action, "
+            "       (select value from identity i where i.candidate_id = c.id "
+            "        and i.kind = 'linkedin_slug' order by value limit 1) as linkedin_slug "
             "from match m join candidate c on c.id = m.candidate_id "
             "where m.role_id = %s order by m.score desc, c.display_name",
             (role_id,),

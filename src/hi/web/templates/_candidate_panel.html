@@ -5,7 +5,11 @@
        class="muted" style="text-decoration:none">Close &times;</a>
   </p>
 
-  <h1 style="margin-top:0">{{ d.display_name or "Name not recorded" }}</h1>
+  {% set li = d.links | selectattr("kind", "equalto", "linkedin_slug") | first %}
+  <h1 style="margin-top:0">
+    {% if li %}<a href="{{ link_url(li.kind, li.value) }}" target="_blank" rel="noopener">{{ d.display_name or "Name not recorded" }}</a>
+    {% else %}{{ d.display_name or "Name not recorded" }}{% endif %}
+  </h1>
   <p class="sub">
     {{ d.location_text or "Location not recorded" }}
     {% if d.experience_floor %} · {{ d.experience_floor }}+ years of public work{% endif %}

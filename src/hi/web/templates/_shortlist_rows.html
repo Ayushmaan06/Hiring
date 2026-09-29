@@ -1,3 +1,18 @@
+{# A name is a link to the person's LinkedIn wherever we have their slug; the
+   Details button then opens the side panel the name used to open. No slug (found only
+   through their public work) and the name opens the panel, as before. #}
+{% macro person(r) -%}
+  {%- set name = r.display_name or "Name not recorded" -%}
+  {%- if r.linkedin_slug -%}
+    <a href="https://www.linkedin.com/in/{{ r.linkedin_slug | urlencode }}" target="_blank" rel="noopener">{{ name }}</a>
+    <button class="btn small secondary" style="margin-left:6px; padding:2px 8px; font-size:12px"
+            hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
+            hx-target="#panel" hx-swap="innerHTML">Details</button>
+  {%- else -%}
+    <a href="#" hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
+       hx-target="#panel" hx-swap="innerHTML">{{ name }}</a>
+  {%- endif -%}
+{%- endmacro %}
 {# Never an empty page and never a spinner with no number. #}
 {% if progress.running %}
   <div hx-get="/roles/{{ role_id }}/rows?show_ruled_out={{ 'true' if show_ruled_out else 'false' }}"
@@ -64,8 +79,7 @@
   {% for r in kept %}
     <tr class="{{ 'row-acted' if r.last_action }}">
       <td>
-        <a href="#" hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
-           hx-target="#panel" hx-swap="innerHTML">{{ r.display_name or "Name not recorded" }}</a>
+        {{ person(r) }}
       </td>
       <td title="{{ '%.3f' | format(r.score | float) }}">
         <span class="{{ 'label-strong' if r.score | float >= 0.55 else 'label-weak' }}">
@@ -114,7 +128,7 @@
     <tbody>
       {% for r in not_looked_at %}
       <tr>
-        <td>{{ r.display_name or "Name not recorded" }}</td>
+        <td>{{ person(r) }}</td>
         <td class="muted">{{ r.primary_location_text or "Location not recorded" }}</td>
       </tr>
       {% endfor %}
@@ -136,8 +150,7 @@
       {% for r in ruled_out %}
       <tr>
         <td>
-          <a href="#" hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
-             hx-target="#panel" hx-swap="innerHTML">{{ r.display_name or "Name not recorded" }}</a>
+          {{ person(r) }}
         </td>
         <td class="muted">
           {% for reason in r.reasons_ruled_out %}{{ plain_reason(reason) }}{% if not loop.last %}; {% endif %}{% endfor %}

@@ -1041,3 +1041,20 @@ def test_a_new_role_searches_five_queries_two_pages_deep(client, db_conn):
         "select payload_json from job where kind = 'discover' and state = 'queued'"
     ).fetchone()[0]
     assert payload["pages"] == 2 and payload["max_queries"] == 5
+
+
+def test_a_name_links_to_linkedin_and_details_still_opens_the_panel(client, db_conn, role_id):
+    candidate_id = add_person(db_conn, role_id, name="alice")
+    db_conn.execute(
+        "insert into identity (candidate_id, kind, value, first_seen, last_seen) "
+        "values (%s, 'linkedin_slug', 'alice-k-123', now(), now())",
+        (candidate_id,),
+    )
+    matching.score_role(role_id, now=NOW)
+
+    body = client.get(f"/roles/{role_id}").text
+    assert 'href="https://www.linkedin.com/in/alice-k-123"' in body
+    assert f'hx-get="/roles/{role_id}/candidates/{candidate_id}"' in body
+
+    panel = client.get(f"/roles/{role_id}/candidates/{candidate_id}").text
+    assert "linkedin.com/in/alice-k-123" in panel.split("</h1>")[0]
