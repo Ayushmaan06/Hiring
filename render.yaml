@@ -1,4 +1,4 @@
-# Render blueprint: the web UI + SerpAPI discovery + Postgres.
+# Render blueprint: the web UI + SerpAPI discovery. Postgres lives on Neon.
 # LinkedIn profile reading attaches to a local Edge window, so it cannot run here;
 # the app degrades to "not looked at yet" for those people, which is by design.
 services:
@@ -11,13 +11,13 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.0
-      - key: DATABASE_URL
-        fromDatabase:
-          name: hiring-db
-          property: connectionString
       - key: COOKIE_SECURE
         value: "true"
       # Secrets: Render asks for these on first deploy. Copy the values from your local .env.
+      # DATABASE_URL: the Neon *direct* URL (host without "-pooler"). The job queue holds
+      # row locks across statements, which a transaction-mode pooler does not guarantee.
+      - key: DATABASE_URL
+        sync: false
       - key: HI_USERS
         sync: false
       - key: SERPAPI_KEY
@@ -28,8 +28,3 @@ services:
         sync: false
       - key: GITHUB_TOKEN
         sync: false
-
-databases:
-  - name: hiring-db
-    plan: free
-    postgresMajorVersion: "16"

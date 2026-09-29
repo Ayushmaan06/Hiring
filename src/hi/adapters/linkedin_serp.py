@@ -35,6 +35,11 @@ MAX_QUERIES_PER_ROLE = 24
 # the ceiling is there to stop "find more" turning into an unbounded bill.
 MAX_PAGES = 5
 
+# A new role's first search: the top 5 planned queries, 2 pages each — at most 10 SERP
+# calls. "Find more people" is how a role goes wider and deeper after that.
+FIRST_SEARCH_QUERIES = 5
+FIRST_SEARCH_PAGES = 2
+
 # Everything under linkedin.com that is not a person.
 NON_PERSON_SEGMENTS = {
     "company", "school", "jobs", "pulse", "posts", "groups", "showcase",
@@ -315,7 +320,7 @@ async def _fetch_page(query_text: str, start: int) -> dict | None:
     return payload
 
 
-async def discover(q: Query, *, pages: int = 1) -> list[CandidateRef]:
+async def discover(q: Query, *, pages: int = 1, should_stop=lambda: False) -> list[CandidateRef]:
     """Run one planned query and return normalised, deduped refs.
 
     Google returns ~10 organic results per request for a `site:` query regardless
@@ -324,6 +329,8 @@ async def discover(q: Query, *, pages: int = 1) -> list[CandidateRef]:
     """
     refs: dict[str, CandidateRef] = {}
     for page in range(pages):
+        if should_stop():
+            break  # the recruiter pressed Stop: every page is a paid SERP search
         payload = await _fetch_page(q.query_text, start=page * 10)
         if payload is None:
             break

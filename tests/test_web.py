@@ -1027,3 +1027,17 @@ def test_a_run_that_gave_up_does_not_leave_a_hopeful_note(client, db_conn, unrea
     body = client.get(f"/roles/{unread}").text
     assert "Reading 2 of 8" not in body
     assert "did not finish" in body
+
+
+def test_a_new_role_searches_five_queries_two_pages_deep(client, db_conn):
+    """The first search is capped at 10 SERP calls; "find more" is how a role grows."""
+    client.post(
+        "/roles",
+        data={"title": "Backend", "titles": "Backend Engineer", "must_have": "Python",
+              "remote": "hybrid", "locations": ["IN-KA-BLR"]},
+        follow_redirects=False,
+    )
+    payload = db_conn.execute(
+        "select payload_json from job where kind = 'discover' and state = 'queued'"
+    ).fetchone()[0]
+    assert payload["pages"] == 2 and payload["max_queries"] == 5

@@ -20,6 +20,12 @@
     {{ progress.found }} {{ "person" if progress.found == 1 else "people" }} looked at so far,
     {{ progress.kept }} worth a closer look. Running {{ progress.waiting_secs }}s —
     this page updates itself, you do not need to refresh.
+    {% if progress.searching %}
+      <form method="post" action="/roles/{{ role_id }}/stop-search" style="display:inline; margin-left:8px"
+            onsubmit="return confirm('Stop searching? Everyone found so far is kept and still ranked.')">
+        <button class="btn small secondary" type="submit">Stop search</button>
+      </form>
+    {% endif %}
   {% else %}
     Looked at {{ progress.found }} people. {{ progress.kept }} were worth a closer look,
     {{ progress.ranked }} ranked.

@@ -383,6 +383,7 @@ def role_progress(role_id: uuid.UUID) -> dict:
         "ranked": ranked,
         "running": pending > 0,
         "stalled": stalled > 0,
+        "searching": doing == "discover",  # shows the Stop button: only SERP spends credits
         "doing": {"discover": "Searching LinkedIn", "enrich": "Reading profiles",
                   "score": "Ranking"}.get(doing, "Starting up"),
         "waiting_secs": since or 0,

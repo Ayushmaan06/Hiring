@@ -143,7 +143,8 @@ def role_counts(role_id: uuid.UUID) -> dict[str, int]:
 
 
 async def run_discovery(
-    role_id: uuid.UUID, spec: RoleSpec, *, pages: int = 1, max_queries: int | None = None
+    role_id: uuid.UUID, spec: RoleSpec, *, pages: int = 1, max_queries: int | None = None,
+    should_stop=lambda: False,
 ) -> dict:
     """Plan -> search -> gate -> persist. Each page of each query is one SERP search.
 
@@ -158,7 +159,9 @@ async def run_discovery(
         queries = queries[:max_queries]
 
     for q in queries:
-        refs = await linkedin_serp.discover(q, pages=pages)
+        if should_stop():
+            break
+        refs = await linkedin_serp.discover(q, pages=pages, should_stop=should_stop)
         fresh = [r for r in refs if r.ref_value not in seen]
         seen.update(r.ref_value for r in fresh)
 
@@ -291,6 +294,16 @@ def regate(role_id: uuid.UUID, spec: RoleSpec, *, apply: bool = True) -> list[tu
                     (new_state, verdict.reason or None, role_id, row["ref_value"]),
                 )
     return changes
+
+
+def queries_run(role_id: uuid.UUID) -> int:
+    """How many distinct SERP queries this role has actually run (not just planned)."""
+    with pool.connection() as conn:
+        return conn.execute(
+            "select count(distinct query_text) from role_query "
+            "where role_id = %s and adapter = %s",
+            (role_id, linkedin_serp.ADAPTER),
+        ).fetchone()[0]
 
 
 def search_depth(role_id: uuid.UUID) -> int:

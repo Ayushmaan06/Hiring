@@ -88,11 +88,36 @@ def claim(locked_by: str) -> Job | None:
 
 
 def complete(job_id: int) -> None:
+    # `stopped` is a recruiter's decision; a handler finishing afterwards must not undo it.
     with pool.connection() as conn:
         conn.execute(
-            "update job set state = 'done', finished_at = now(), last_error = null where id = %s",
+            "update job set state = 'done', finished_at = now(), last_error = null "
+            "where id = %s and state <> 'stopped'",
             (job_id,),
         )
+
+
+def stop_discovery(role_id, actor: str | None = None) -> int:
+    """The "Stop search" button: halt a role's queued or running SERP search.
+
+    A running handler notices through `is_stopped` before its next SERP page, so at most
+    the request already in flight is paid for. What it found so far is kept and ranked.
+    """
+    with pool.connection() as conn:
+        rows = conn.execute(
+            "update job set state = 'stopped', finished_at = now(), locked_at = null, "
+            "  locked_by = null, last_error = %s "
+            "where kind = 'discover' and payload_json->>'role_id' = %s "
+            "and state in ('queued', 'running') returning id",
+            (f"stopped by {actor or 'a recruiter'}", str(role_id)),
+        ).fetchall()
+    return len(rows)
+
+
+def is_stopped(job_id: int) -> bool:
+    with pool.connection() as conn:
+        row = conn.execute("select state from job where id = %s", (job_id,)).fetchone()
+    return row is not None and row[0] == "stopped"
 
 
 def fail(job_id: int, error: str) -> str:
@@ -108,10 +133,11 @@ def fail(job_id: int, error: str) -> str:
             "  last_error = %s,"
             "  locked_at = null, locked_by = null,"
             "  finished_at = case when attempts >= %s then now() else null end "
-            "where id = %s returning state",
+            "where id = %s and state <> 'stopped' returning state",
             (MAX_ATTEMPTS, error[:2000], MAX_ATTEMPTS, job_id),
-        ).fetchone()[0]
-    return state
+        ).fetchone()
+    # A stopped job that then errors stays stopped — requeueing it would restart the spend.
+    return state[0] if state else "stopped"
 
 
 def reap(lease_minutes: int = LEASE_MINUTES) -> int:
@@ -196,7 +222,8 @@ async def handle_discover(job: Job) -> None:
     assert isinstance(spec, RoleSpec)
 
     result = await discovery.run_discovery(
-        role_id, spec, pages=int(payload.get("pages", 1)), max_queries=payload.get("max_queries")
+        role_id, spec, pages=int(payload.get("pages", 1)), max_queries=payload.get("max_queries"),
+        should_stop=lambda: is_stopped(job.id),
     )
     print(f"discover {role_id}: {result}")
 

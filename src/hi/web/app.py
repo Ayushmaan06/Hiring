@@ -303,7 +303,7 @@ def create_role(
     max_years: str = Form(""),
     remote: str = Form("onsite"),
     locations: list[str] = Form(default=[]),
-    pages: int = Form(1),
+    pages: int = Form(linkedin_serp.FIRST_SEARCH_PAGES),
 ):
     def split(value: str) -> list[str]:
         return [v.strip() for v in value.split(",") if v.strip()]
@@ -329,7 +329,10 @@ def create_role(
 
     role_id = roles.confirm(title, spec, jd_text=jd_text, actor=request.state.actor)
     depth = max(1, min(pages, linkedin_serp.MAX_PAGES))
-    worker.enqueue("discover", {"role_id": str(role_id), "pages": depth})
+    worker.enqueue("discover", {
+        "role_id": str(role_id), "pages": depth,
+        "max_queries": linkedin_serp.FIRST_SEARCH_QUERIES,
+    })
     return RedirectResponse(f"/roles/{role_id}", status_code=303)
 
 
@@ -373,10 +376,17 @@ def _search_context(role_id: uuid.UUID, spec) -> dict:
     different (and much larger) button.
     """
     depth = discovery.search_depth(role_id)
+    planned = len(linkedin_serp.plan(spec))
+    ran = min(discovery.queries_run(role_id), planned) or planned  # 0: predates role_query
     return {
         "search_depth": depth,
-        "search_queries": len(linkedin_serp.plan(spec)),
+        "search_queries": ran,
         "search_at_max": depth >= linkedin_serp.MAX_PAGES,
+        # "Find more" runs every planned query to depth+1. Pages already fetched in the
+        # last 24h come from the fetch cache, so: one new page per query already run, and
+        # every page for a query never run. ponytail: assumes the cache is warm; a role
+        # last searched over a day ago re-pays its earlier pages (planned * (depth+1)).
+        "find_more_cost": ran + (planned - ran) * (depth + 1),
     }
 
 
@@ -471,6 +481,13 @@ def _collect_context(role_id: uuid.UUID) -> dict:
 # Why a click was refused. The panel turns each of these into a sentence — the endpoint
 # never composes prose, so there is exactly one place to read what a recruiter is told.
 READING_REFUSALS = ("started", "off", "spent", "no-browser", "busy", "nobody")
+
+
+@app.post("/roles/{role_id}/stop-search")
+def stop_search(request: Request, role_id: uuid.UUID):
+    """Stop spending SERP credits on this role. Whoever was already found stays."""
+    worker.stop_discovery(role_id, actor=request.state.actor)
+    return RedirectResponse(f"/roles/{role_id}?more=stopped", status_code=303)
 
 
 @app.post("/roles/{role_id}/enrich")

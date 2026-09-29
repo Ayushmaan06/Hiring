@@ -332,3 +332,21 @@ def note_of(conn) -> str:
     return conn.execute(
         "select note from job where kind = 'enrich' order by id desc limit 1"
     ).fetchone()[0]
+
+
+# --- the Stop search button --------------------------------------------------
+
+
+def test_stopped_search_stays_stopped(db_conn):
+    role = str(uuid.uuid4())
+    running = worker.enqueue("discover", {"role_id": role})
+    worker.claim("w1")
+    other = worker.enqueue("score", {"role_id": role})
+
+    assert worker.stop_discovery(role, actor="r@x") == 1
+    assert worker.is_stopped(running)
+    # The handler finishing or erroring after Stop must not revive it.
+    worker.complete(running)
+    assert worker.fail(running, "boom") == "stopped"
+    assert state_of(db_conn, running) == "stopped"
+    assert worker.claim("w1").id == other, "a stopped search is never reclaimed"

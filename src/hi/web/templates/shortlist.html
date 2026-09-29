@@ -33,6 +33,11 @@
       We also re-checked everyone already found against this role, and nobody moved.
     {% endif %}
   </div>
+{% elif more == 'stopped' %}
+  <div class="note">
+    <strong>Search stopped.</strong> No more searches will be used for this role. Everyone
+    found so far is kept and is still being ranked.
+  </div>
 {% elif more == 'busy' %}
   <div class="note warn">
     A search is already running for this role. Let it finish, then ask again.
@@ -62,8 +67,8 @@
     <button class="btn">Find more people</button>
   </form>
   <p class="hint">
-    Takes all {{ search_queries }} searches one page deeper &mdash; roughly
-    {{ search_queries }} more searches and a few minutes. It also re-checks everyone
+    Searches one page deeper, and tries every search we have not run yet &mdash; about
+    {{ find_more_cost }} more searches and a few minutes. It also re-checks everyone
     already found against this role's locations and must-have skills, so anyone who
     should not have come through is moved to the ruled-out list.
   </p>
