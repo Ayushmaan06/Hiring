@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Roles{% endblock %}
+
+{% block content %}
+<h1>Roles</h1>
+<p class="sub">Every search you have run. Click a row to see who we found.</p>
+
+<p><a class="btn" href="/roles/new">New role</a></p>
+
+{% if not roles %}
+  <p class="muted">Nothing here yet. Start with <strong>New role</strong> and paste a job description.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Status</th>
+      <th>People found</th>
+      <th>Worth a look</th>
+      <th>Ranked</th>
+      <th>You shortlisted</th>
+      <th>Last searched</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in roles %}
+    <tr>
+      <td><a href="/roles/{{ r.id }}">{{ r.title or "Untitled role" }}</a></td>
+      <td><span class="pill">{{ r.status }}</span></td>
+      <td>{{ r.found }}</td>
+      <td>{{ r.kept }}</td>
+      <td>{{ r.ranked }}</td>
+      <td>{{ r.shortlisted }}</td>
+      <td class="muted">{{ r.last_run.strftime("%d %b %Y") if r.last_run else "not yet" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

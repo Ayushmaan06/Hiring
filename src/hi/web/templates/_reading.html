@@ -1,0 +1,184 @@
+{# Reading LinkedIn profiles (IMPLEMENTATION.md 1.11d). Its own fragment because a run
+   is minutes long and this section polls itself while one is going. The polling lives on
+   this element and the swap is outerHTML, so when the run ends the polling ends with it. #}
+<section id="reading"
+         {% if reading_now %}
+         hx-get="/roles/{{ role_id }}/reading" hx-trigger="every 3s" hx-swap="outerHTML"
+         {% endif %}>
+<h2>Read LinkedIn profiles</h2>
+
+{% if reading == 'off' %}
+  <div class="note warn">
+    <strong>Reading profiles has switched itself off.</strong> LinkedIn showed a wall on an
+    earlier run, so nothing will be read until someone turns it back on deliberately.
+    <a href="/admin/health">What happened</a>
+  </div>
+{% elif reading == 'spent' %}
+  <div class="note warn">
+    All {{ collect_cap }} profile reads for the last 24 hours are used up.
+    {% if collect_frees_at %}The next one frees up around {{ collect_frees_at }}.{% endif %}
+  </div>
+{% elif reading == 'no-browser' %}
+  <div class="note warn">
+    <strong>The LinkedIn window is not open.</strong> Reading happens in a real signed-in
+    browser on the machine running this tool, so that window has to be open first &mdash;
+    step 1 below opens it. Nothing was started.
+  </div>
+{% elif reading == 'busy' %}
+  <div class="note warn">
+    A profile read is already running &mdash; for this role or another one. They go one at
+    a time, on one account. Let it finish, then ask again.
+  </div>
+{% elif reading == 'nobody' %}
+  <div class="note">
+    Everyone found for this role has already been read. Look for more people above first.
+  </div>
+{% elif reading == 'started' %}
+  <div class="note"><strong>Reading now.</strong> Progress is below and updates on its own.</div>
+{% endif %}
+
+{# The standing state of things. Skipped when a click just answered, so a refusal and
+   its cause are not printed twice one under the other. #}
+{% if not reading %}
+{% if reading_off %}
+  <div class="note warn">
+    <strong>Reading profiles is switched off.</strong> It turns itself off the moment
+    LinkedIn shows a wall, and a person has to turn it back on.
+    <a href="/admin/health">Why</a>
+  </div>
+{% elif collect_budget == 0 %}
+  <div class="note warn">
+    All {{ collect_cap }} profile reads for the last 24 hours are used up. More free up
+    gradually as the oldest reads age out &mdash; this is a rolling window, not a daily reset.
+    {% if collect_frees_at %}The next one is back around {{ collect_frees_at }}.{% endif %}
+  </div>
+{% endif %}
+{% endif %}
+
+<p class="sub">
+  {{ collect_todo|length }} {{ "person" if collect_todo|length == 1 else "people" }} found here
+  and not yet read &middot; {{ collect_done|length }} already read &middot;
+  <strong>{{ collect_budget }} of {{ collect_cap }}</strong> reads left today, shared across
+  every role.
+</p>
+
+{% if reading_now %}
+  {# The one state that matters most: a run that stopped must say so, here, in words.
+     A blank spinner over a blocked run is the failure this whole panel exists to catch. #}
+  {% set note = reading_job.note or "" %}
+  <div class="note {{ 'warn' if note.startswith('Stopped') else '' }}">
+    <strong>{{ note or "Starting up&hellip;" }}</strong>
+    {% if not note.startswith('Stopped') %}
+      <br><span class="hint">
+        About 25 seconds each, deliberately unhurried. Leave the LinkedIn window open and
+        visible while this runs. You can leave this page &mdash; it keeps going.
+      </span>
+    {% endif %}
+  </div>
+{% elif reading_job and reading_job.note and not reading %}
+  <div class="note {{ 'warn' if reading_job.note.startswith('Stopped') else '' }}">
+    Last read: {{ reading_job.note }}
+    {% if reading_job.note.startswith('Stopped') %}
+      {% if reading_job.retryable %}
+        <br><span class="hint">Nothing was read, so nothing was spent. Try again.</span>
+      {% else %}
+        <br><span class="hint">Do not start it again today.</span>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if (collect_todo or collect_refused) and collect_budget and not reading_now %}
+{% if not reading_off %}
+{% if collect_todo %}
+<form method="post" action="/roles/{{ role_id }}/enrich">
+  <label for="howmany">How many to read now</label>
+  <input type="number" id="howmany" name="limit" min="1" max="{{ collect_default }}"
+         value="{{ collect_default }}" style="width:90px"
+         oninput="document.querySelectorAll('.cmd-limit').forEach(e =&gt; e.textContent = this.value || 1)">
+  <button class="btn">Read them now</button>
+</form>
+<p class="hint">
+  Taken from the top of the queue below, best match first. About 25 seconds each, so
+  <span class="cmd-limit">{{ collect_default }}</span> takes a few minutes.
+  {% if not reading_ready %}
+    <br><strong>The LinkedIn window is not open yet</strong> &mdash; open it with step 1 below,
+    then this will work.
+  {% endif %}
+</p>
+{% endif %}
+
+{# The gate's verdict is a default, not a ruling. A recruiter who thinks it was too tight
+   can spend their own daily reads on the people it refused, and see for themselves. #}
+{% if collect_refused %}
+<div class="note" style="margin-top:16px">
+  <strong>{{ collect_refused|length }}
+  {{ "person was" if collect_refused|length == 1 else "people were" }} ruled out before
+  reading, from what the search could see alone.</strong>
+  <br><span class="hint">
+    If those reasons look too strict, read them anyway and let the ranking decide. Both
+    options below come out of the same {{ collect_budget }} reads left today.
+  </span>
+  <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap">
+    <form method="post" action="/roles/{{ role_id }}/enrich">
+      <input type="hidden" name="scope" value="ruled_out">
+      <input type="hidden" name="limit" value="{{ collect_refused_default }}">
+      <button class="btn secondary">Read the {{ collect_refused_default }} ruled out</button>
+    </form>
+    {% if collect_todo %}
+    <form method="post" action="/roles/{{ role_id }}/enrich">
+      <input type="hidden" name="scope" value="all">
+      <input type="hidden" name="limit" value="{{ collect_all_default }}">
+      <button class="btn secondary">Read everyone &mdash; all {{ collect_all_default }}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+{# Kept on purpose: the same run, by hand. It is the only way in if the tool and the
+   signed-in browser are on different machines, and it is how you watch a run in detail. #}
+<details style="margin-top:16px" {% if reading_off or not reading_ready %}open{% endif %}>
+  <summary>Or run it yourself</summary>
+  <p class="hint" style="margin-top:16px">1. Open the LinkedIn browser, if it is not already open:</p>
+  <pre class="cmd">&amp; "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --remote-debugging-port=9222 --user-data-dir="{{ collect_profile_dir }}"</pre>
+
+  <p class="hint">2. Read the profiles, then fold them into the ranking:</p>
+  <pre class="cmd">python -m hi.adapters.linkedin_profile run --role {{ collect_role_ref }} --limit <span class="cmd-limit">{{ collect_default }}</span>
+python -m hi.worker</pre>
+
+  <p class="hint">
+    Leave the LinkedIn window open and visible while it runs. If it prints
+    <code>STOPPED</code>, LinkedIn showed a wall and reading has switched itself off &mdash; do
+    not start it again the same day.
+  </p>
+</details>
+{% endif %}
+
+<details style="margin-top:16px">
+  <summary>The queue &mdash; {{ collect_todo|length }} waiting, {{ collect_done|length }} read</summary>
+  <table style="margin-top:10px">
+    <tr><th>#</th><th>Name</th><th>LinkedIn</th><th>Status</th></tr>
+    {% for p in collect_todo %}
+    <tr>
+      <td class="muted">{{ loop.index }}</td>
+      <td>{{ p.name or "&mdash;" }}</td>
+      <td><a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.slug }}</a></td>
+      <td>
+        {% if loop.index <= collect_default %}<span class="badge badge-proven">next run</span>
+        {% else %}<span class="muted">waiting</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    {% for p in collect_done %}
+    <tr class="row-acted">
+      <td class="muted">&mdash;</td>
+      <td>{{ p.name or "&mdash;" }}</td>
+      <td><a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.slug }}</a></td>
+      <td><span class="badge badge-said">already read</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+</details>
+</section>

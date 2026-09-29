@@ -1,0 +1,171 @@
+{# Never an empty page and never a spinner with no number. #}
+{% if progress.running %}
+  <div hx-get="/roles/{{ role_id }}/rows?show_ruled_out={{ 'true' if show_ruled_out else 'false' }}"
+       hx-trigger="every 3s" hx-target="#rows" hx-swap="innerHTML"></div>
+{% endif %}
+{% if progress.stalled %}
+  {# "Searching…" over a queue nobody is draining is the same lie as a green health
+     light over a dead adapter. Say which process is missing, and name it. #}
+  <div class="note bad">
+    <strong>The search has not started.</strong> It is waiting for the background worker,
+    which does not appear to be running. Start it on the server with
+    <code>python -m hi.worker</code> and this page will catch up on its own.
+  </div>
+{% endif %}
+<p class="sub">
+  {% if progress.stalled %}
+    Waiting to start — nothing has been searched yet.
+  {% elif progress.running %}
+    <span class="working">{{ progress.doing }}…</span>
+    {{ progress.found }} {{ "person" if progress.found == 1 else "people" }} looked at so far,
+    {{ progress.kept }} worth a closer look. Running {{ progress.waiting_secs }}s —
+    this page updates itself, you do not need to refresh.
+  {% else %}
+    Looked at {{ progress.found }} people. {{ progress.kept }} were worth a closer look,
+    {{ progress.ranked }} ranked.
+  {% endif %}
+</p>
+
+{% if not kept and not progress.running and not_looked_at %}
+  <div class="note warn">
+    <strong>Nobody has been read yet.</strong>
+    We found {{ progress.found }} people in the search and haven't read any profiles,
+    so there is nothing to rank. Reading profiles is a separate step.
+  </div>
+{% elif not kept and not progress.running %}
+  <div class="note warn">
+    <strong>Nobody came through.</strong>
+    We looked at {{ progress.found }} people.
+    {% if ruled_out %}
+      The most common reason for ruling someone out was:
+      <em>{{ plain_reason(ruled_out[0].reasons_ruled_out[0]) if ruled_out[0].reasons_ruled_out else "no reason recorded" }}</em>.
+      Try widening the job titles or the locations.
+    {% else %}
+      Try fewer must-haves, or more job titles.
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if kept %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th><th>How well they match</th><th>Proven skills</th>
+      <th>Location</th><th>Your call</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in kept %}
+    <tr class="{{ 'row-acted' if r.last_action }}">
+      <td>
+        <a href="#" hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
+           hx-target="#panel" hx-swap="innerHTML">{{ r.display_name or "Name not recorded" }}</a>
+      </td>
+      <td title="{{ '%.3f' | format(r.score | float) }}">
+        <span class="{{ 'label-strong' if r.score | float >= 0.55 else 'label-weak' }}">
+          {{ match_label(r.score | float) }}
+        </span>
+        <span class="bar">
+          {% for i in range(5) %}<i class="{{ 'on' if i < match_segments(r.score | float) }}"></i>{% endfor %}
+        </span>
+      </td>
+      <td>
+        {% if r.top_proven %}
+          <ul class="chips">{% for s in r.top_proven %}<li>{{ s }}</li>{% endfor %}</ul>
+        {% else %}<span class="muted">Nothing proven yet</span>{% endif %}
+      </td>
+      <td class="muted">{{ r.primary_location_text or "not recorded" }}</td>
+      <td>
+        {% if r.last_action %}
+          <span class="muted">{{ r.last_action.replace("_", " ") }}</span>
+        {% else %}
+          <div id="act-{{ r.match_id }}" style="display:flex; gap:4px">
+            {% for value, text in [('shortlisted','Shortlist'), ('needs_info','Maybe'), ('rejected','Not a fit')] %}
+              <button class="btn small secondary"
+                      hx-post="/matches/{{ r.match_id }}/action"
+                      hx-vals='{"action": "{{ value }}"}'
+                      hx-target="#act-{{ r.match_id }}" hx-swap="innerHTML">{{ text }}</button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{# Not a rejection. These people have been found and nothing more, so saying anything
+   about whether they fit would be inventing it. #}
+{% if not_looked_at %}
+  <h2>{{ not_looked_at | length }} people we haven't looked at yet</h2>
+  <p class="sub">
+    We found them in the search but haven't read their profiles, so we can't say
+    whether they fit. They are not ruled out.
+  </p>
+  <table>
+    <thead><tr><th>Name</th><th>Where we found them</th></tr></thead>
+    <tbody>
+      {% for r in not_looked_at %}
+      <tr>
+        <td>{{ r.display_name or "Name not recorded" }}</td>
+        <td class="muted">{{ r.primary_location_text or "Location not recorded" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{# Hidden exclusions are indistinguishable from bugs. #}
+{% if ruled_out %}
+  <h2>
+    <a href="/roles/{{ role_id }}?show_ruled_out={{ 'false' if show_ruled_out else 'true' }}">
+      {{ 'Hide' if show_ruled_out else 'Show' }} the {{ ruled_out | length }} people we ruled out
+    </a>
+  </h2>
+  {% if show_ruled_out %}
+  <table>
+    <thead><tr><th>Name</th><th>Why we ruled them out</th></tr></thead>
+    <tbody>
+      {% for r in ruled_out %}
+      <tr>
+        <td>
+          <a href="#" hx-get="/roles/{{ role_id }}/candidates/{{ r.candidate_id }}"
+             hx-target="#panel" hx-swap="innerHTML">{{ r.display_name or "Name not recorded" }}</a>
+        </td>
+        <td class="muted">
+          {% for reason in r.reasons_ruled_out %}{{ plain_reason(reason) }}{% if not loop.last %}; {% endif %}{% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+{% endif %}
+
+{# The search found these and never opened them. Hiding them makes an over-tight gate
+   look like an empty market: "looked at 23 people" over a list of 11. #}
+{% if not_opened %}
+  <h2>{{ not_opened | length }} we did not open</h2>
+  <p class="sub">
+    The search found them, but what it could see was enough to rule them out before
+    reading anything. If a reason below looks wrong, the search is too narrow &mdash;
+    widen the job titles or add a location. You can also
+    <a href="#reading">read them anyway</a> and let the ranking decide.
+  </p>
+  <details>
+    <summary class="muted">Show them and the reason</summary>
+    <table style="margin-top:10px">
+      <thead><tr><th>Name</th><th>Where</th><th>Why we did not open it</th></tr></thead>
+      <tbody>
+        {% for r in not_opened %}
+        <tr>
+          <td><a href="{{ r.source_url }}" target="_blank" rel="noopener">{{ r.snippet_name or "Name not recorded" }}</a></td>
+          <td class="muted">{{ r.snippet_location or "&mdash;" }}</td>
+          <td class="muted">{{ plain_reason(r.gate_reason or "") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+{% endif %}

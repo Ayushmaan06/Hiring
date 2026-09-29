@@ -1,0 +1,1140 @@
+<title>Hiring Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:      #F7F8F7;
+    --surface:     #FFFFFF;
+    --surface-alt: #EFF2F0;
+    --ink:         #161C1E;
+    --muted:       #5E6A68;
+    --hairline:    #DDE3E0;
+    --pine:        #1F5B45;
+    --pine-soft:   #E4EDE8;
+    --clay:        #8A6C42;
+    --clay-soft:   #F1EADD;
+    --flag:        #8C3B2E;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #121618;
+      --surface:     #1A1F21;
+      --surface-alt: #212829;
+      --ink:         #E8EDEA;
+      --muted:       #9AA8A4;
+      --hairline:    #2C3436;
+      --pine:        #7FC4A6;
+      --pine-soft:   #1C2E27;
+      --clay:        #C9A472;
+      --clay-soft:   #2B2519;
+      --flag:        #E0857A;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #121618;
+    --surface:     #1A1F21;
+    --surface-alt: #212829;
+    --ink:         #E8EDEA;
+    --muted:       #9AA8A4;
+    --hairline:    #2C3436;
+    --pine:        #7FC4A6;
+    --pine-soft:   #1C2E27;
+    --clay:        #C9A472;
+    --clay-soft:   #2B2519;
+    --flag:        #E0857A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 56px;
+  }
+
+  @media (min-width: 1000px) {
+    .shell { grid-template-columns: 208px minmax(0, 1fr); }
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    grid-column: 1 / -1;
+    border-bottom: 2px solid var(--ink);
+    padding: 56px 0 22px;
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 3.9rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    margin: 0 0 16px;
+  }
+
+  .standfirst {
+    font-size: 1.22rem;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 34em;
+    margin: 0 0 26px;
+  }
+
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .meta-strip b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- reading guide ---------- */
+
+  .guide {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: 1fr;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+    margin-bottom: 56px;
+  }
+  @media (min-width: 720px) { .guide { grid-template-columns: 1fr 1fr; } }
+
+  .guide > div { background: var(--surface); padding: 22px 24px; }
+  .guide h4 {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pine);
+    margin: 0 0 8px;
+  }
+  .guide p { margin: 0; font-size: 15.5px; color: var(--muted); line-height: 1.5; }
+  .guide a { color: var(--ink); }
+
+  /* ---------- index ---------- */
+
+  nav.index { display: none; }
+
+  @media (min-width: 1000px) {
+    nav.index {
+      display: block;
+      grid-column: 1;
+      align-self: start;
+      position: sticky;
+      top: 32px;
+      padding-top: 4px;
+    }
+  }
+
+  nav.index ol { list-style: none; margin: 0; padding: 0; }
+  nav.index li { margin-bottom: 7px; }
+  nav.index a {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--muted);
+    text-decoration: none;
+    display: block;
+  }
+  nav.index a:hover { color: var(--pine); }
+  nav.index .grp {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 600;
+    margin: 22px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  nav.index .grp:first-child { margin-top: 0; }
+
+  /* ---------- main ---------- */
+
+  main { grid-column: 1 / -1; min-width: 0; }
+  @media (min-width: 1000px) { main { grid-column: 2; } }
+
+  .part-rule {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    border-top: 2px solid var(--ink);
+    padding-top: 14px;
+    margin: 76px 0 40px;
+  }
+  .part-rule:first-child { margin-top: 0; }
+  .part-rule .pnum {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--pine);
+    white-space: nowrap;
+  }
+  .part-rule .ptitle {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+  .part-rule .pfor {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 24px; }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.62rem;
+    line-height: 1.16;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+    margin: 0 0 6px;
+    display: flex;
+    gap: 14px;
+  }
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--pine);
+    padding-top: 0.42em;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.06rem;
+    letter-spacing: -0.006em;
+    margin: 34px 0 8px;
+  }
+
+  p { margin: 0 0 16px; max-width: 66ch; }
+  main > section > p:first-of-type { margin-top: 14px; }
+
+  strong { font-weight: 600; }
+  a { color: var(--pine); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  ul, ol.body-list { max-width: 66ch; padding-left: 20px; margin: 0 0 18px; }
+  li { margin-bottom: 8px; }
+
+  .lede {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 60ch;
+    margin-bottom: 22px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.855em;
+    background: var(--surface-alt);
+    padding: 0.12em 0.36em;
+    border-radius: 2px;
+  }
+
+  /* ---------- badges: the core idea ---------- */
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: 0.08em;
+  }
+  .badge.proven { background: var(--pine-soft); color: var(--pine); box-shadow: inset 0 0 0 1px var(--pine); }
+  .badge.claimed { background: var(--clay-soft); color: var(--clay); box-shadow: inset 0 0 0 1px var(--clay); }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--pine);
+    padding: 20px 24px;
+    margin: 26px 0;
+  }
+  .callout.warn { border-left-color: var(--flag); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .clabel {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pine);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .callout.warn .clabel { color: var(--flag); }
+
+  /* ---------- tables ---------- */
+
+  .tw { overflow-x: auto; margin: 22px 0; border: 1px solid var(--hairline); }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; background: var(--surface); }
+  th, td {
+    text-align: left;
+    padding: 11px 15px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 14.5px;
+    vertical-align: top;
+    line-height: 1.45;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-alt);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- pipeline flow ---------- */
+
+  .flow { margin: 26px 0; overflow-x: auto; padding-bottom: 6px; }
+  .flow-inner { display: flex; align-items: stretch; gap: 0; min-width: 700px; }
+  .step {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-right: none;
+    padding: 13px 15px;
+    position: relative;
+  }
+  .step:last-child { border-right: 1px solid var(--hairline); }
+  .step .sn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--pine);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .step .st { font-family: var(--display); font-weight: 600; font-size: 13.5px; line-height: 1.25; display: block; margin-bottom: 4px; }
+  .step .sd { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .step.human { background: var(--pine-soft); }
+  .step.human .sd { color: var(--pine); }
+
+  /* ---------- screen mock ---------- */
+
+  .mock {
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    margin: 26px 0 10px;
+    overflow: hidden;
+    font-family: var(--display);
+  }
+  .mock-bar {
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--hairline);
+    padding: 9px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .mock-bar b { color: var(--ink); font-weight: 500; }
+  .mock-body { padding: 0; }
+  .crow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px 16px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  @media (min-width: 640px) {
+    .crow { grid-template-columns: 1.5fr 1.05fr 1.5fr auto; align-items: center; }
+  }
+  .crow:last-child { border-bottom: none; }
+  .cname { font-weight: 600; font-size: 15px; letter-spacing: -0.005em; }
+  .cmeta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .mlabel { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 5px; }
+  .mlabel.strong { color: var(--pine); }
+  .mlabel.good { color: var(--ink); }
+  .mlabel.poss { color: var(--muted); }
+  .bar { display: flex; gap: 2px; }
+  .bar i { height: 5px; flex: 1; background: var(--hairline); border-radius: 1px; }
+  .bar i.on { background: var(--pine); }
+  .skills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .acts { display: flex; gap: 5px; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 5px 9px;
+    border: 1px solid var(--hairline);
+    color: var(--muted);
+    background: var(--ground);
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .btn.primary { border-color: var(--pine); color: var(--pine); background: var(--pine-soft); font-weight: 600; }
+  .mock-foot {
+    padding: 10px 16px;
+    border-top: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .caption {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0 0 30px;
+    max-width: 62ch;
+  }
+
+  /* evidence panel mock */
+  .evrow {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--hairline);
+    font-family: var(--display);
+  }
+  .evrow:last-child { border-bottom: none; }
+  .evbody { min-width: 0; }
+  .evclaim { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .evsnip { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.45; }
+  .evsnip span { color: var(--pine); }
+
+  /* ---------- q&a ---------- */
+
+  .qa { border-top: 1px solid var(--hairline); padding-top: 18px; margin-top: 26px; }
+  .qa dt { font-family: var(--display); font-weight: 600; font-size: 1rem; margin-bottom: 6px; }
+  .qa dd { margin: 0 0 22px; color: var(--muted); max-width: 66ch; }
+  .qa dd:last-child { margin-bottom: 0; }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    grid-column: 1 / -1;
+    border-top: 2px solid var(--ink);
+    margin-top: 40px;
+    padding-top: 20px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 30px;
+  }
+
+  :focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Internal product brief · Draft for review</p>
+    <h1>Hiring Intelligence</h1>
+    <p class="standfirst">Give it the requirements for a role. Get back twenty candidates worth
+      contacting — each one with the evidence for why, linked to its source.</p>
+    <div class="meta-strip">
+      <span>Status <b>Draft v1, for discussion</b></span>
+      <span>Date <b>22 August 2026</b></span>
+      <span>Users <b>Internal recruiting team</b></span>
+      <span>Scope <b>Engineering roles first</b></span>
+    </div>
+  </header>
+
+  <div class="guide">
+    <div>
+      <h4>If you hire people</h4>
+      <p>Read <a href="#part-one">Part One</a>. It covers what the tool does, what the screens look
+        like, what it deliberately won't do, and the questions we need you to answer. No technical
+        knowledge assumed. About eight minutes.</p>
+    </div>
+    <div>
+      <h4>If you build software</h4>
+      <p>Read <a href="#part-one">Part One</a> for the product intent, then
+        <a href="#part-two">Part Two</a> for architecture, data model, scoring, and the build plan.
+        Full detail lives in <code>docs/ARCHITECTURE.md</code>.</p>
+    </div>
+  </div>
+
+  <nav class="index" aria-label="Sections">
+    <ol>
+      <li class="grp">Part One</li>
+      <li><a href="#s1">1 · The problem</a></li>
+      <li><a href="#s2">2 · What it does</a></li>
+      <li><a href="#s3">3 · Proven vs. says so</a></li>
+      <li><a href="#s4">4 · The screens</a></li>
+      <li><a href="#s5">5 · What it won't do</a></li>
+      <li><a href="#s6">6 · Cost and timeline</a></li>
+      <li><a href="#s7">7 · Questions asked</a></li>
+      <li class="grp">Part Two</li>
+      <li><a href="#s8">8 · Architecture</a></li>
+      <li><a href="#s9">9 · Evidence model</a></li>
+      <li><a href="#s10">10 · Ranking</a></li>
+      <li><a href="#s11">11 · Where AI is used</a></li>
+      <li><a href="#s12">12 · Sourcing and law</a></li>
+      <li><a href="#s13">13 · Build plan</a></li>
+      <li><a href="#s14">14 · Risks</a></li>
+      <li class="grp">Close</li>
+      <li><a href="#s15">15 · Success criteria</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============ PART ONE ============ -->
+
+    <div class="part-rule" id="part-one">
+      <span class="pnum">Part One</span>
+      <span class="ptitle">The product</span>
+      <span class="pfor">no technical knowledge needed</span>
+    </div>
+
+    <section id="s1">
+      <h2><span class="num">1</span><span>The problem we're solving</span></h2>
+      <p class="lede">Finding a good engineer currently means one person scrolling search results
+        for hours, and no record of why anyone looked promising.</p>
+      <p>Today, sourcing for a role looks like this: open a job board or a professional network,
+        type in some keywords, scroll through hundreds of results, open the promising ones one at a
+        time, and try to judge from a list of self-described skills whether someone can actually do
+        the job. Then do it again next week, because there's no saved view — and again for the next
+        role, from scratch.</p>
+      <p>Three things go wrong. It takes a long time. The judgement is based on what people
+        <em>say</em> about themselves, which is the weakest available evidence. And when a candidate
+        gets passed to a hiring manager, nobody can explain precisely why that person was picked
+        over the ninety others.</p>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">2</span><span>What the tool does</span></h2>
+      <p>You paste in a job description. The tool reads it and shows you what it understood —
+        required skills, experience range, locations — which you correct if it got anything wrong.
+        You press <strong>Find candidates</strong>.</p>
+      <p>It then spends a few minutes searching the places where engineers leave a public trail of
+        their actual work: code they've published, projects they've built, packages other developers
+        use, technical writing, portfolios, programming-contest results. It reads what it finds,
+        works out who these people are, and ranks them against your requirements.</p>
+      <p>You get a ranked list. For each person, you can see every single thing the tool believes
+        about them, and click straight through to the page it came from.</p>
+
+      <div class="flow">
+        <div class="flow-inner">
+          <div class="step"><span class="sn">01</span><span class="st">Paste the role</span><span class="sd">Job description in, plain text</span></div>
+          <div class="step human"><span class="sn">02</span><span class="st">Confirm what it read</span><span class="sd">You check and correct</span></div>
+          <div class="step"><span class="sn">03</span><span class="st">Search public work</span><span class="sd">A few minutes, runs on its own</span></div>
+          <div class="step"><span class="sn">04</span><span class="st">Gather the evidence</span><span class="sd">Every claim keeps its source</span></div>
+          <div class="step"><span class="sn">05</span><span class="st">Rank against the role</span><span class="sd">Same rules every time</span></div>
+          <div class="step human"><span class="sn">06</span><span class="st">You decide</span><span class="sd">Shortlist, maybe, not a fit</span></div>
+        </div>
+      </div>
+      <p class="caption">Two of the six steps are yours. The tool never contacts anyone, never
+        decides who's in or out, and never hides why someone ranked where they did.</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">3</span><span>The one idea that makes this better than a keyword search</span></h2>
+      <p class="lede">There is a large difference between someone listing a skill and someone
+        demonstrably having it. Every other tool treats those the same. This one doesn't.</p>
+      <p>Consider two candidates who both come up in a search for Python:</p>
+
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>What we found</th><th>How we label it</th><th>What it's worth</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"Python" appears in the skills list on their personal site</td>
+              <td><span class="badge claimed">Says so</span></td>
+              <td>Weak. Anyone can type it. Counts, but only a little.</td>
+            </tr>
+            <tr>
+              <td>Fourteen published Python projects, 2,100 commits, most recent three weeks ago</td>
+              <td><span class="badge proven">Proven</span></td>
+              <td>Strong. This is work you can go and read.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The tool keeps these permanently separate. It never quietly averages them into a single
+        number. On screen, <span class="badge proven">Proven</span> and
+        <span class="badge claimed">Says so</span> look completely different, and proven evidence
+        counts for roughly three times as much in the ranking.</p>
+      <p>This is also why every claim carries a link and a short quote from the page it came from.
+        If you want to check something, you're one click from the original.</p>
+
+      <div class="callout">
+        <span class="clabel">Why this matters in practice</span>
+        <p>When a hiring manager asks "why this person?", the answer is on the screen, in specifics:
+          <em>"Eleven years of published Go, maintains a library with 4,000 users, active last
+          month, based in Bangalore."</em> Not "the algorithm scored them 87."</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">4</span><span>What you'll actually use</span></h2>
+      <p>Four screens. Deliberately four — every extra screen is somewhere to get lost.</p>
+
+      <h3>Screen 1 · Your roles</h3>
+      <p>A list of the roles you're working on, how many candidates each has found, how many you've
+        shortlisted. One button: <strong>New role</strong>.</p>
+
+      <h3>Screen 2 · New role</h3>
+      <p>A box to paste the job description. Then a short form showing what the tool understood, so
+        you can fix it before it searches — skills as removable tags, experience as two numbers,
+        locations by name ("Delhi NCR", "Bangalore"), and how you feel about remote work in plain
+        words. Nothing runs until you press the button.</p>
+
+      <h3>Screen 3 · The shortlist</h3>
+      <p>The screen you'll spend your time on. Candidates ranked best-first, each with a plain-word
+        match rating instead of a score out of a hundred.</p>
+
+      <div class="mock" role="img" aria-label="Mock-up of the shortlist screen showing three ranked candidates with match ratings, proven skills and action buttons">
+        <div class="mock-bar">
+          <span><b>Senior Backend Engineer</b> · Delhi NCR, Bangalore · 4–8 years</span>
+          <span>28 found · 3 shortlisted</span>
+        </div>
+        <div class="mock-body">
+          <div class="crow">
+            <div>
+              <div class="cname">A. Krishnan</div>
+              <div class="cmeta">Bangalore · active 6 days ago · 9+ yrs public work</div>
+            </div>
+            <div>
+              <div class="mlabel strong">Strong match</div>
+              <div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+            </div>
+            <div class="skills">
+              <span class="badge proven">Python</span>
+              <span class="badge proven">PostgreSQL</span>
+              <span class="badge proven">Kubernetes</span>
+            </div>
+            <div class="acts">
+              <span class="btn primary">Shortlist</span><span class="btn">Maybe</span><span class="btn">Not a fit</span>
+            </div>
+          </div>
+          <div class="crow">
+            <div>
+              <div class="cname">S. Mehta</div>
+              <div class="cmeta">Gurgaon · active 2 months ago · 6+ yrs public work</div>
+            </div>
+            <div>
+              <div class="mlabel good">Good match</div>
+              <div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+            </div>
+            <div class="skills">
+              <span class="badge proven">Python</span>
+              <span class="badge claimed">PostgreSQL</span>
+              <span class="badge proven">Redis</span>
+            </div>
+            <div class="acts">
+              <span class="btn primary">Shortlist</span><span class="btn">Maybe</span><span class="btn">Not a fit</span>
+            </div>
+          </div>
+          <div class="crow">
+            <div>
+              <div class="cname">R. Iyer</div>
+              <div class="cmeta">Remote, India · active 3 weeks ago · 4+ yrs public work</div>
+            </div>
+            <div>
+              <div class="mlabel poss">Possible match</div>
+              <div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+            </div>
+            <div class="skills">
+              <span class="badge proven">Python</span>
+              <span class="badge claimed">Kubernetes</span>
+            </div>
+            <div class="acts">
+              <span class="btn primary">Shortlist</span><span class="btn">Maybe</span><span class="btn">Not a fit</span>
+            </div>
+          </div>
+        </div>
+        <div class="mock-foot">Show the 14 candidates we ruled out, and why →</div>
+      </div>
+      <p class="caption">Illustrative layout, not a finished visual design. Note the last row: the
+        candidates the tool <em>excluded</em> are always one click away, with the reason. A tool
+        that silently drops people is impossible to trust.</p>
+
+      <h3>Screen 4 · One candidate</h3>
+      <p>Slides in over the list, so you don't lose your place. Top: who they are, where, how long
+        they've been publishing work, and links out. Then a short breakdown of why they ranked where
+        they did. Then everything the tool found, each item labelled and sourced.</p>
+
+      <div class="mock" role="img" aria-label="Mock-up of the candidate detail panel showing individual evidence rows with proven and says-so labels and source quotes">
+        <div class="mock-bar">
+          <span><b>A. Krishnan</b> · Bangalore · 9+ yrs of public work</span>
+          <span>Strong match</span>
+        </div>
+        <div class="mock-body">
+          <div class="evrow">
+            <span class="badge proven">Proven</span>
+            <div class="evbody">
+              <div class="evclaim">Python — 14 repositories, 2,140 commits, last May 2026</div>
+              <div class="evsnip">github.com/akrishnan · <span>"Primary language: Python (68% of 210k lines)"</span></div>
+            </div>
+          </div>
+          <div class="evrow">
+            <span class="badge proven">Proven</span>
+            <div class="evbody">
+              <div class="evclaim">PostgreSQL — maintains a query-planning library, 1.2k users</div>
+              <div class="evsnip">pypi.org/project/pgplanner · <span>"Requires: psycopg 3.1"</span></div>
+            </div>
+          </div>
+          <div class="evrow">
+            <span class="badge claimed">Says so</span>
+            <div class="evbody">
+              <div class="evclaim">Team leadership — five years managing a platform team</div>
+              <div class="evsnip">akrishnan.dev/about · <span>"Led the platform team of six since 2021"</span></div>
+            </div>
+          </div>
+          <div class="evrow">
+            <span class="badge claimed">Says so</span>
+            <div class="evbody">
+              <div class="evclaim">Location — Bangalore, India</div>
+              <div class="evsnip">github.com/akrishnan · <span>"Bengaluru 🇮🇳"</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-foot">Previously: Not a fit — Backend II, March 2026</div>
+      </div>
+      <p class="caption">Every row: what we believe, how confident we are, where it came from, and
+        the exact words that support it. The footer prevents the most irritating possible failure —
+        showing you someone you already turned down.</p>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">5</span><span>What this will not do</span></h2>
+      <p class="lede">Worth reading carefully. These are deliberate limits, not gaps we plan to
+        close, and knowing them now avoids disappointment later.</p>
+
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>It won't</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Search LinkedIn or paid resume databases as its main source</strong></td>
+              <td>Resume databases sit behind expensive recruiter subscriptions, and automated
+                collection from professional networks has been aggressively litigated. We use public
+                work instead. We may try a small, careful, capped LinkedIn helper later — see §12.</td>
+            </tr>
+            <tr>
+              <td><strong>Find every good engineer</strong></td>
+              <td>It finds engineers who leave public work. That correlates with being good, but it
+                systematically misses excellent people who publish nothing. This trades breadth for
+                confidence, on purpose. <strong>It complements your existing sourcing; it doesn't
+                replace it.</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Tell you someone's salary or notice period</strong></td>
+              <td>That information doesn't exist publicly anywhere. It comes from talking to the
+                person. You can record it in the tool afterwards; the tool can't find it.</td>
+            </tr>
+            <tr>
+              <td><strong>Work for non-engineering roles yet</strong></td>
+              <td>Sales, ops, marketing and finance leave almost no public evidence of skill. The
+                same approach would perform badly. Engineering first; we'll reassess.</td>
+            </tr>
+            <tr>
+              <td><strong>Contact anybody</strong></td>
+              <td>No automated emails, ever. The tool identifies people and shows you their public
+                links. Outreach stays human, through channels the person chose to publish.</td>
+            </tr>
+            <tr>
+              <td><strong>Decide who to hire, or reject anyone on its own</strong></td>
+              <td>It ranks and explains. Every judgement that matters is yours, and anyone it
+                filtered out is always visible with the reason.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="clabel">Fairness — a deliberate design constraint</span>
+        <p>The ranking is forbidden from using college name or tier, graduation year, age, gender,
+          caste, religion, marital status, or anything derived from someone's name. Not merely
+          hidden from the filters — <strong>the system does not collect them at all</strong>. This
+          is enforced in the code with a fixed list of permitted inputs, so adding anything new is
+          a visible, reviewable change rather than a quiet one.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">6</span><span>What it costs and how long it takes</span></h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Item</th><th class="mono">Estimate</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Running cost, per role searched</td><td class="num">₹200–350</td><td>Search and AI reading costs. Roughly $2–4.</td></tr>
+            <tr><td>Monthly running cost, ~30 searches</td><td class="num">₹6,000–11,000</td><td>Plus one small server, about ₹2,000.</td></tr>
+            <tr><td>Paid data subscriptions</td><td class="num">₹0</td><td>None. For comparison, one Naukri Resdex seat starts around ₹55,000 per quarter.</td></tr>
+            <tr><td>Time to first usable version</td><td class="num">3–4 weeks</td><td>One source, real shortlists, the four screens.</td></tr>
+            <tr><td>Time to broad version</td><td class="num">7–9 weeks</td><td>All sources, weekly refresh, admin tools.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The first version is intentionally narrow: one source, end to end, in front of a real
+        recruiter on a real open role. If the candidates it produces aren't good, we've learned that
+        in three weeks rather than three months, and very little is wasted.</p>
+    </section>
+
+    <section id="s7">
+      <h2><span class="num">7</span><span>What we need from you</span></h2>
+      <dl class="qa">
+        <dt>Which role will we test on first?</dt>
+        <dd>We need one genuinely open engineering role, and one recruiter willing to judge the
+          output honestly. The test is simple: of the top ten, how many would you actually contact?
+          Six or more and this works.</dd>
+
+        <dt>How many engineering roles do you run in a year?</dt>
+        <dd>This matters more than it sounds. If it's two, a saved-search checklist would serve you
+          better than software, and we should say so now. If it's fifteen or more, this pays back
+          quickly.</dd>
+
+        <dt>Who signs off on data handling?</dt>
+        <dd>We're storing information about named individuals. India's data-protection rules came
+          fully into force in November 2025. Our approach is deliberately conservative — public
+          self-published work only, deletion honoured on request, nothing kept past 180 days unless
+          you're actively considering the person — but somebody senior needs to have read and
+          approved that before we switch on the first source.</dd>
+
+        <dt>Whose LinkedIn account, if we try the LinkedIn helper?</dt>
+        <dd>If we test it, it runs inside one person's own browser, at human pace, capped at fifteen
+          profiles a day. The real risk is that <em>that individual's account gets restricted</em>.
+          Whoever volunteers should understand that clearly and agree to it. It's optional, and
+          we'll drop it if it doesn't earn its place.</dd>
+      </dl>
+    </section>
+
+    <!-- ============ PART TWO ============ -->
+
+    <div class="part-rule" id="part-two">
+      <span class="pnum">Part Two</span>
+      <span class="ptitle">How it's built</span>
+      <span class="pfor">for engineers</span>
+    </div>
+
+    <section id="s8">
+      <h2><span class="num">8</span><span>Architecture</span></h2>
+      <p class="lede">A monolith and a worker against one Postgres database. The interesting
+        decisions are about data shape and sourcing, not infrastructure.</p>
+      <p>FastAPI · Postgres 16 · httpx + selectolax · Playwright as a lazy fallback only · Jinja2 +
+        HTMX · the Anthropic SDK. One Docker Compose, one VM. The job queue is a Postgres table read
+        with <code>FOR UPDATE SKIP LOCKED</code> by a single worker process.</p>
+      <p>Deliberately absent, each considered and rejected for a team this size: Redis, Celery,
+        Kafka, Elasticsearch, a vector database, a crawler fleet, and a single-page app. Re-adding
+        any of them requires a written reason.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Decision</th><th>Instead of</th><th>Because</th></tr></thead>
+          <tbody>
+            <tr><td>Role-triggered search, cached</td><td>Continuous crawling</td><td>Profiles go stale, and holding data on people you aren't evaluating is a liability. A search is minutes and a few dollars — run it when it's needed.</td></tr>
+            <tr><td>Evidence as the primary table</td><td>Attributes on a candidate row</td><td>Explainability, per-claim freshness, and cascade-deletion for erasure all fall out of one decision.</td></tr>
+            <tr><td>Postgres as the queue</td><td>Redis + Celery</td><td>Roughly 30 searches a month. <code>SKIP LOCKED</code> is sufficient and adds no operational surface.</td></tr>
+            <tr><td>Server-rendered HTMX</td><td>React / Next.js</td><td>Four screens, no build step, one deploy artifact.</td></tr>
+            <tr><td>Undefended sources first</td><td>Anti-bot arms race</td><td>Public APIs, personal sites and PDFs need no proxies, no CAPTCHA solving, no fingerprint spoofing. Choosing sources well deletes the entire problem.</td></tr>
+            <tr><td>Search API for discovery only</td><td>Scraping Google</td><td>The most-defended target on the internet, and the substitute costs about 20¢ per role. We use it as a sitemap, then fetch and parse every page ourselves.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="s9">
+      <h2><span class="num">9</span><span>The evidence model</span></h2>
+      <p>Every assertion about a person is one row:</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">Column</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">claim_type</td><td><code>skill</code>, <code>title</code>, <code>employer</code>, <code>location</code>, <code>activity</code>, <code>availability</code>, <code>project</code>…</td></tr>
+            <tr><td class="mono">tier</td><td><code>artifact_backed</code> · <code>third_party_stated</code> · <code>self_reported</code></td></tr>
+            <tr><td class="mono">source_url</td><td>the page it came from</td></tr>
+            <tr><td class="mono">snippet</td><td><strong>a verbatim excerpt</strong> supporting the claim</td></tr>
+            <tr><td class="mono">observed_at</td><td>when we saw it</td></tr>
+            <tr><td class="mono">extractor</td><td>which parser or prompt version produced it</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Candidate attributes are <em>derived from</em> evidence, never stored beside it. Three
+        invariants are enforced in code and tested:</p>
+      <ul>
+        <li><strong>No snippet, no claim.</strong> The snippet must be a literal substring of the
+          source document. This is checked programmatically after extraction, and a row that fails
+          is dropped rather than corrected. It is the guard against an AI inventing a fact.</li>
+        <li><strong>Tiers never merge.</strong> They are weighted separately and badged separately
+          all the way to the screen.</li>
+        <li><strong>Deleting a candidate cascades.</strong> Erasure is a foreign key, not a
+          procedure.</li>
+      </ul>
+      <p>Identity resolution uses <strong>strong keys only</strong> — a platform login, a personal
+        domain, a hashed email. One key belongs to exactly one person, enforced by a unique
+        constraint. Anything weaker goes to a human review queue. Nothing auto-merges, because a
+        false merge is silent and irreversible.</p>
+    </section>
+
+    <section id="s10">
+      <h2><span class="num">10</span><span>Ranking</span></h2>
+      <p>Hard gates first — missing must-have skill, wrong location, no recent activity — each
+        failure recorded with its reason and visible in the UI. Then a plain weighted sum of five
+        components, every one in the range 0–1, all five always present:</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">Component</th><th>Measures</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">skill_match</td><td>tier-weighted coverage of the required skills (artifact 1.0, third-party 0.6, self-reported 0.35)</td></tr>
+            <tr><td class="mono">skill_depth</td><td>volume × recency of artefact evidence per must-have skill, log-scaled</td></tr>
+            <tr><td class="mono">seniority_fit</td><td>distance from the target range, using estimated years — never parsed from a job title</td></tr>
+            <tr><td class="mono">activity_recency</td><td>decay on the most recent artefact</td></tr>
+            <tr><td class="mono">availability</td><td>public availability signal; unknown scores 0, never negative</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Weights live in a database row with a version, not in code. Every stored match records the
+        scorer version and weights version, so a re-score is a new row and you can always reconstruct
+        why something ranked where it did last Tuesday. Two runs over identical inputs produce
+        byte-identical output; <code>scoring.py</code> is a pure function with no I/O and no clock,
+        which is why its tests are cheap.</p>
+      <p>Fairness is enforced structurally: the scorer reads only from a
+        <code>FEATURE_ALLOWLIST</code> constant, and the component keys are asserted equal to it on
+        every write. A <code>BANNED_SIGNALS</code> set covers college, graduation year, age, name
+        tokens and the protected characteristics — and those are excluded at
+        <em>extraction</em> time, so they never enter the database at all.</p>
+      <p><strong>No learning from hire outcomes.</strong> Recruiter decisions aggregate into
+        <em>proposed</em> weight changes on an admin page that a human approves. Training a ranker on
+        historical hires would faithfully reproduce whatever bias those hires contained.</p>
+    </section>
+
+    <section id="s11">
+      <h2><span class="num">11</span><span>Where AI is used, and where it isn't</span></h2>
+      <p class="lede">This is conventional software with four AI call-sites. It is not an agent.
+        There is no autonomous loop.</p>
+      <p>The governing rule: <strong>a model may read unstructured text and emit structured data, or
+        write prose a human will read. It may not decide, rank, merge, or do arithmetic.</strong></p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>AI does</th><th>AI never does</th></tr></thead>
+          <tbody>
+            <tr><td>Read a job description into a draft spec — <em>which a human confirms</em></td><td>Compute or adjust a score</td></tr>
+            <tr><td>Expand search queries with skill synonyms</td><td>Decide whether two profiles are the same person</td></tr>
+            <tr><td>Turn an unstructured page into evidence rows against a strict schema</td><td>Decide whether a URL may be fetched</td></tr>
+            <tr><td>Write the plain-language explanation of a ranking</td><td>Infer anything about a person that isn't stated on a page</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Each call-site is fail-safe. A bad job-description parse shows the raw output next to an
+        empty form. A malformed extraction writes zero rows and quarantines the document — never
+        partial data. A rationale citing evidence that doesn't belong to the candidate is discarded,
+        and the score, computed beforehand, is unaffected.</p>
+      <p>Extraction runs on Haiku 4.5 at temperature 0 — it's schema-filling, not reasoning — with a
+        stronger model for the two low-volume judgement tasks. Prompts are versioned files in the
+        repo, and changing one requires a version bump because extractor version is part of a unique
+        key.</p>
+    </section>
+
+    <section id="s12">
+      <h2><span class="num">12</span><span>Sourcing and the legal position</span></h2>
+      <p>Every source implements one small adapter interface, so each is independently switchable
+        and reports its own yield — how many candidates it found, how many survived the gates, how
+        many a recruiter actually shortlisted. That number, not an opinion, decides whether a source
+        stays.</p>
+
+      <h3>What we learned checking this out</h3>
+      <ul>
+        <li><strong>Job boards expose jobs, not candidates.</strong> Their resume databases are
+          behind paid recruiter logins. Scraping the public side yields postings, which are useless
+          for sourcing. This invalidated the original plan's primary source.</li>
+        <li><strong>hiQ Labs did not win.</strong> The 2019 ruling narrowing the CFAA is often cited
+          as protecting scrapers, but the case settled in December 2022 with a $500,000 judgment
+          against hiQ, liability for trespass to chattels and misappropriation, a permanent
+          injunction, and an order to destroy the scraped data and derived algorithms.</li>
+        <li><strong>Proxycurl, the largest LinkedIn data provider at ~$10M ARR, shut down
+          permanently in July 2025</strong> after LinkedIn and Microsoft sued. The aggravating fact
+          was operating hundreds of thousands of fake accounts to reach data behind the login wall.
+          The founder's stated reason for folding: he couldn't afford to fight Microsoft even if he
+          would have won.</li>
+        <li><strong>GitHub's acceptable-use policy permits collection through its API but forbids
+          using the data to send unsolicited email.</strong> So we identify and evaluate from it; we
+          do not harvest addresses. Emails are stored as SHA-256 only.</li>
+        <li><strong>India's DPDP Act §3(c)(ii) excludes personal data the person published
+          themselves</strong> — which covers most of what we collect, <em>as processed in the form it
+          was made public</em>. Two important limits: crawlable is not the same as exempt, and
+          combining public data with non-public data can pull the whole record back into scope. That
+          last point is the strongest technical argument against ever importing a purchased
+          enrichment file.</li>
+      </ul>
+
+      <h3>Operating posture</h3>
+      <p>No domain can be fetched without an enabled row in a <code>source_policy</code> table, and
+        the fetch layer is the only path to the network — robots.txt, per-host rate limiting, daily
+        caps and caching all live there. A cross-domain redirect re-enters the policy check. No
+        residential proxies, no CAPTCHA solving, no fingerprint spoofing: a target that needs those
+        is a target we drop.</p>
+
+      <div class="callout warn">
+        <span class="clabel">The LinkedIn helper — approved, tightly scoped</span>
+        <p>Three modes, ascending risk. <strong>Snippet-only</strong> reads title, company and
+          location from public search results without ever fetching a page. <strong>Paste</strong>
+          lets a recruiter paste a profile they opened themselves. <strong>Attached browser</strong>
+          drives the recruiter's own already-logged-in Chrome: never headless, never a burner or
+          shared account, no stored credentials, one profile at a time, at least twenty seconds
+          apart, fifteen a day, and it disables itself on the first authwall or challenge until a
+          human re-enables it.</p>
+        <p>These limits live in code, not configuration. The rationale: the fake-account fleet is
+          what draws a lawsuit; a person using their own session at human pace is a different risk
+          class. The residual risk is real and lands on an individual — <strong>that person's
+          account may be restricted</strong> — so whoever's account is used must agree explicitly.
+          Yield metrics decide within a month whether it stays.</p>
+      </div>
+    </section>
+
+    <section id="s13">
+      <h2><span class="num">13</span><span>Build plan</span></h2>
+      <p>Milestone 1 is a thin vertical slice: one source, real shortlists, four screens. Nothing
+        broadens until a recruiter has used it on a real open role.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">M</th><th>Scope</th><th>Done when</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">1</td>
+              <td>Schema · fetch layer · skill and location canon · GitHub adapter · evidence writer · identity resolution · role intake · scoring · job queue · four screens · login</td>
+              <td>A recruiter runs a real role, gets ≥20 candidates, and says the top ten are worth contacting</td>
+            </tr>
+            <tr>
+              <td class="mono">2</td>
+              <td>Web-search adapter (portfolios, public resumes, speaker lists, maintainer files) · Hugging Face · Codeforces · manual paste · AI-written rationales</td>
+              <td>Finds candidates GitHub alone missed, and the yield metrics prove it</td>
+            </tr>
+            <tr>
+              <td class="mono">3</td>
+              <td>The LinkedIn helper, all three modes, shipped in order</td>
+              <td>It can be switched off with one row update, and 30 days of yield data can answer whether it earns its risk</td>
+            </tr>
+            <tr>
+              <td class="mono">4</td>
+              <td>Observability · retention and erasure jobs · weekly re-search of standing roles · weight proposals</td>
+              <td>Erasure verifiably removes evidence rows <em>and</em> cached page bodies</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Testing: no live network in CI — every adapter runs against recorded fixtures. Property
+        tests on the pure scorer. Repo-wide invariant tests asserting every snippet is present in
+        its source and every component set matches the allowlist. One end-to-end run from job
+        description to shortlist. No load tests, no browser end-to-end, no coverage thresholds —
+        wrong tools at this size.</p>
+    </section>
+
+    <section id="s14">
+      <h2><span class="num">14</span><span>Risks, stated plainly</span></h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Risk</th><th>Severity</th><th>Response</th></tr></thead>
+          <tbody>
+            <tr><td>Coverage disappoints a recruiter expecting LinkedIn-scale breadth</td><td>High / likely</td><td>Set the expectation in the UI itself, before the first search runs. Position as a complement, not a replacement.</td></tr>
+            <tr><td>Seniority estimates skew low — publishing history isn't career length</td><td>Medium</td><td>Display as a floor ("9+ years of public work"), never a range implying we know the ceiling.</td></tr>
+            <tr><td>The <code>availability</code> signal turns out to be near-empty</td><td>Low</td><td>Measure the distribution during Milestone 1; drop the component if it's flat rather than let it add noise.</td></tr>
+            <tr><td>Extraction silently misses content — we test against fabrication, not omission</td><td>Medium</td><td>Hand-label ~30 pages as a recall baseline before Milestone 2.</td></tr>
+            <tr><td>The LinkedIn helper gets an individual's account restricted</td><td>Medium / accepted</td><td>Named volunteer, informed consent, hard caps, self-disabling. Droppable.</td></tr>
+            <tr><td>Nobody uses it because it's one more tool</td><td>High</td><td>The only real mitigation is Milestone 1 being genuinely good. Which is why it's narrow.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>And the honest one: <strong>a recruiter with GitHub's advanced search and thirty minutes can
+        do one role by hand.</strong> This tool earns its keep on repeatability, the evidence trail,
+        and running five roles at once — not on finding things a person couldn't. If you hire two
+        engineers a year, a saved-search checklist beats this, and we should decide that now rather
+        than after the build.</p>
+    </section>
+
+    <section id="s15">
+      <h2><span class="num">15</span><span>How we'll know it worked</span></h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Measure</th><th class="mono">Target</th></tr></thead>
+          <tbody>
+            <tr><td>Of the top ten candidates, how many a recruiter would contact</td><td class="num">≥ 6</td></tr>
+            <tr><td>Time from job description to a reviewed shortlist</td><td class="num">&lt; 30 min</td></tr>
+            <tr><td>Share of shortlisted candidates whose key skills are <span class="badge proven">Proven</span>, not claimed</td><td class="num">≥ 70%</td></tr>
+            <tr><td>Recruiter can explain a ranking unaided, from the screen</td><td class="num">Always</td></tr>
+            <tr><td>Candidates found this way who reach a first interview, per quarter</td><td class="num">≥ 3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The first measure is the one that matters. If the top ten aren't worth contacting, nothing
+        else on this page is worth having.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Hiring Intelligence · internal product brief</span>
+    <span>Draft v1 · 22 Aug 2026</span>
+    <span>Detail: <code>docs/ARCHITECTURE.md</code> · <code>docs/IMPLEMENTATION.md</code> · <code>AGENTS.md</code></span>
+  </footer>
+
+</div>

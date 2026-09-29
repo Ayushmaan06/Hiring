@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.dual-graph/
+
+# Runtime data
+var/
+.env
+
+# Real profile URLs / spike output — not for git (see spikes/mode_b_yield.py)
+spikes/mode_b_urls.txt
+spikes/mode_b_yield_results.json
+
+Connections.csv

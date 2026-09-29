@@ -1,0 +1,37 @@
+{
+  "search_metadata": {
+    "status": "Success"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "Leadership \u2014 Kestrel Foods",
+      "link": "https://kestrelfoods.example.com/leadership",
+      "snippet": "Priya Sharma, Vice President of Supply Chain ..."
+    },
+    {
+      "position": 2,
+      "title": "Priya Sharma - Kestrel Foods | LinkedIn",
+      "link": "https://www.linkedin.com/in/priya-sharma-1234",
+      "snippet": "Priya Sharma. VP Supply Chain at Kestrel Foods."
+    },
+    {
+      "position": 3,
+      "title": "Priya Sharma Email & Phone Number - RocketReach",
+      "link": "https://rocketreach.co/priya-sharma-email_1234",
+      "snippet": "Get Priya Sharma's contact details."
+    },
+    {
+      "position": 4,
+      "title": "Priya Sharma jobs - Naukri.com",
+      "link": "https://www.naukri.com/some-listing",
+      "snippet": "Resume of Priya Sharma."
+    },
+    {
+      "position": 5,
+      "title": "Kestrel Foods opens new plant",
+      "link": "https://tradepress.example.org/kestrel-hosur",
+      "snippet": "Kestrel Foods Pvt Ltd announced a facility ..."
+    }
+  ]
+}

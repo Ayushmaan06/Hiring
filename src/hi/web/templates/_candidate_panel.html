@@ -1,0 +1,111 @@
+{# Screen 4. This screen is the entire point of the product. #}
+<div class="panel">
+  <p style="text-align:right; margin:0">
+    <a href="#" hx-get="/roles/{{ role_id }}/rows" hx-target="#panel" hx-swap="innerHTML"
+       class="muted" style="text-decoration:none">Close &times;</a>
+  </p>
+
+  <h1 style="margin-top:0">{{ d.display_name or "Name not recorded" }}</h1>
+  <p class="sub">
+    {{ d.location_text or "Location not recorded" }}
+    {% if d.experience_floor %} · {{ d.experience_floor }}+ years of public work{% endif %}
+  </p>
+
+  {% if d.links %}
+  <p>
+    {% for l in d.links %}
+      {% if link_url(l.kind, l.value) %}
+        <a href="{{ link_url(l.kind, l.value) }}" target="_blank" rel="noopener">
+          {{ link_labels.get(l.kind, l.kind) }}</a>{% if not loop.last %} · {% endif %}
+      {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  {% if d.seniority_basis == 'estimated' %}
+    <div class="note warn">Experience is estimated from public work, not read from a profile.</div>
+  {% elif d.seniority_basis == 'computed' %}
+    <div class="note">Experience is counted from the dated jobs on their LinkedIn profile.</div>
+  {% elif d.seniority_basis == 'unknown' %}
+    <div class="note warn">We have nothing to estimate experience from.</div>
+  {% endif %}
+
+  <h2>Why this ranking</h2>
+  {% if d.components %}
+    {% for key, value in d.components.items() %}
+      <div class="compbar">
+        <span>{{ component_labels.get(key, key) }}</span>
+        <span class="track"><span class="fill" style="width: {{ (value * 100) | round }}%"></span></span>
+        <span class="muted">{{ (value * 100) | round | int }}%</span>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">Not ranked yet.</p>
+  {% endif %}
+
+  {% set failures = [] %}
+  {% for k, v in d.gates.items() %}
+    {% if v is string and v.startswith('fail') %}{% set _ = failures.append(v) %}{% endif %}
+  {% endfor %}
+  {% if failures %}
+    <div class="note bad">
+      <strong>Ruled out because:</strong>
+      <ul style="margin:6px 0 0">{% for f in failures %}<li>{{ plain_reason(f) }}</li>{% endfor %}</ul>
+    </div>
+  {% endif %}
+
+  <h2>What we found</h2>
+
+  {% if d.proven %}
+    <p><span class="badge badge-proven">Proven</span>
+       <span class="muted">— we can point at the work itself</span></p>
+    {% for c in d.proven %}
+      <div class="claim">
+        <strong>{{ c.label }}</strong>
+        <blockquote>{{ c.snippet }}</blockquote>
+        <a href="{{ c.source_url }}" target="_blank" rel="noopener" class="muted">Source</a>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if d.says_so %}
+    <p style="margin-top:20px"><span class="badge badge-said">Says so</span>
+       <span class="muted">— stated, but we have not seen the work</span></p>
+    {% for c in d.says_so %}
+      <div class="claim">
+        <strong>{{ c.label }}</strong>
+        <blockquote>{{ c.snippet }}</blockquote>
+        <a href="{{ c.source_url }}" target="_blank" rel="noopener" class="muted">Source</a>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if not d.proven and not d.says_so %}
+    <p class="muted">Nothing recorded about this person yet.</p>
+  {% endif %}
+
+  {% if d.previously_seen %}
+    <h2>You have seen this person before</h2>
+    <ul>
+      {% for p in d.previously_seen %}
+        <li>{{ p.action.replace("_", " ") }} — {{ p.role_title }},
+            {{ p.when.strftime("%b %Y") }}{% if p.note %} ({{ p.note }}){% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if d.match_id %}
+  <h2>Your call</h2>
+  <div id="panel-act-{{ d.match_id }}">
+    <form hx-post="/matches/{{ d.match_id }}/action"
+          hx-target="#panel-act-{{ d.match_id }}" hx-swap="innerHTML">
+      <input type="text" name="note" placeholder="Add a note (optional)">
+      <p style="margin-top:10px; display:flex; gap:6px">
+        <button class="btn small" name="action" value="shortlisted">Shortlist</button>
+        <button class="btn small secondary" name="action" value="needs_info">Maybe</button>
+        <button class="btn small secondary" name="action" value="rejected">Not a fit</button>
+      </p>
+    </form>
+  </div>
+  {% endif %}
+</div>

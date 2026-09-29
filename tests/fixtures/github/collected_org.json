@@ -1,0 +1,25 @@
+{
+  "user": {
+    "login": "acme-corp",
+    "type": "Organization",
+    "name": "Acme Corp",
+    "location": "Bengaluru, Karnataka, India",
+    "html_url": "https://github.com/acme-corp"
+  },
+  "repos": [
+    {
+      "repo": {
+        "full_name": "acme-corp/platform",
+        "html_url": "https://github.com/acme-corp/platform",
+        "fork": false,
+        "private": false,
+        "archived": false,
+        "size": 90000,
+        "pushed_at": "2026-06-20T10:00:00Z",
+        "stargazers_count": 1200,
+        "owner": {"login": "acme-corp"}
+      },
+      "languages": {"Python": 900000, "Go": 400000}
+    }
+  ]
+}

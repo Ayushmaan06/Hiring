@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ role_title or "Shortlist" }}{% endblock %}
+
+{% block content %}
+<h1>{{ role_title or "Shortlist" }}</h1>
+
+{% if enrichment_degraded %}
+  <div class="note warn">
+    Employment history is unavailable right now, so years of experience are estimated from
+    each person's public work rather than read from their profile.
+    <a href="/admin/health">Why</a>
+  </div>
+{% endif %}
+
+{# The poll lives INSIDE the partial, not on this wrapper: a trigger out here is
+   decided once at page load, so a search that starts a second later never gets
+   polled, and one that finishes polls forever. Each response re-arms or drops it. #}
+<div id="rows">
+  {% include "_shortlist_rows.html" %}
+</div>
+
+{% if search_depth is defined %}
+<h2>Not enough people?</h2>
+
+{% if more == 'started' %}
+  <div class="note">
+    <strong>Looking for more people now.</strong> Every search for this role is going one
+    page deeper. It takes a few minutes and the list above fills in on its own.
+    {% if rechecked %}
+      We also re-checked everyone already found, and {{ rechecked }}
+      {{ "person" if rechecked == 1 else "people" }} moved &mdash; see the ruled-out list above.
+    {% else %}
+      We also re-checked everyone already found against this role, and nobody moved.
+    {% endif %}
+  </div>
+{% elif more == 'busy' %}
+  <div class="note warn">
+    A search is already running for this role. Let it finish, then ask again.
+  </div>
+{% elif more == 'deepest' %}
+  <div class="note warn">
+    <strong>This role has been searched as deep as it goes.</strong>
+    {% if rechecked %}
+      We did re-check everyone already found, and {{ rechecked }}
+      {{ "person" if rechecked == 1 else "people" }} moved.
+    {% endif %}
+  </div>
+{% endif %}
+
+<p class="sub">
+  Searched {{ search_queries }} different ways, {{ search_depth }}
+  {{ "page" if search_depth == 1 else "pages" }} deep, and found {{ progress.found }} people.
+</p>
+
+{% if search_at_max %}
+  <p class="hint">
+    There is no more depth to add. To reach different people, start a role with wider job
+    titles, another location, or fewer must-have skills.
+  </p>
+{% elif not progress.running %}
+  <form method="post" action="/roles/{{ role_id }}/find-more">
+    <button class="btn">Find more people</button>
+  </form>
+  <p class="hint">
+    Takes all {{ search_queries }} searches one page deeper &mdash; roughly
+    {{ search_queries }} more searches and a few minutes. It also re-checks everyone
+    already found against this role's locations and must-have skills, so anyone who
+    should not have come through is moved to the ruled-out list.
+  </p>
+{% endif %}
+{% endif %}
+
+{% if collect_todo is defined %}{% include "_reading.html" %}{% endif %}
+
+<div id="panel"></div>
+{% endblock %}

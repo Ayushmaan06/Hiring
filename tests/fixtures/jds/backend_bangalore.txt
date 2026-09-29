@@ -1,0 +1,19 @@
+Senior Backend Engineer — Bengaluru (Hybrid)
+
+About the role
+We're looking for a Senior Backend Engineer to join our payments team in Bengaluru.
+This is a hybrid role: three days a week in our Whitefield office.
+
+What you'll need
+- 5+ years of experience building production backend services
+- Strong Python
+- Solid PostgreSQL — schema design, query tuning
+- Experience with Docker and building REST APIs
+
+Nice to have
+- Kubernetes
+- Exposure to Kafka or another event streaming system
+- Prior fintech or payments experience
+
+About you
+You care about correctness, you write tests, and you can explain a tradeoff.

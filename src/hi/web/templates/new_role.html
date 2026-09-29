@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}New role{% endblock %}
+
+{% block content %}
+<h1>New role</h1>
+<p class="sub">Step 1 of 2 — paste the job description and we'll read it.</p>
+
+<form hx-post="/roles/read" hx-target="#step2" hx-swap="innerHTML">
+  <label for="jd_text">Paste the job description</label>
+  <textarea id="jd_text" name="jd_text" rows="16"
+            placeholder="Paste the whole thing — title, requirements, location. We'll pull out what to search for and you can correct it."></textarea>
+  <p style="margin-top:14px"><button class="btn" type="submit">Read it</button></p>
+</form>
+
+<div id="step2"></div>
+{% endblock %}

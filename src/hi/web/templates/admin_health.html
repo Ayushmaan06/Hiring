@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Health{% endblock %}
+{% block header_note %}internal — not linked from the recruiter pages{% endblock %}
+
+{% block content %}
+<h1>Health</h1>
+<p class="sub">
+  Green means a source produced new information recently — <strong>not</strong> merely that
+  it ran without error. A source that runs cleanly and returns nothing is the usual sign
+  that a website changed its layout, so that shows amber.
+</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>Source</th><th>Where</th><th>State</th><th>Last worked</th>
+        <th>Requests (24h)</th><th>Last error</th></tr>
+  </thead>
+  <tbody>
+  {% for a in adapters %}
+    <tr>
+      <td><span class="light {{ a.light }}"></span></td>
+      <td>{{ a.adapter }}</td>
+      <td class="muted">{{ a.domain }}</td>
+      <td>{{ a.note }}</td>
+      <td class="muted">{{ a.last_success.strftime("%d %b %H:%M") if a.last_success else "never" }}</td>
+      <td>{{ a.requests_24h }}</td>
+      <td class="muted" style="max-width:280px">{{ a.last_error or "—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Saved pages on disk</h2>
+<p>
+  <span class="light {{ cache.light }}"></span>
+  {{ cache.human }} of {{ cache.budget_human }} used ({{ (cache.share * 100) | round | int }}%)
+</p>
+
+<h2>Background work</h2>
+<p>
+  {% if queue %}
+    {% for state, n in queue.items() %}{{ state }}: {{ n }}{% if not loop.last %} · {% endif %}{% endfor %}
+  {% else %}
+    Nothing queued.
+  {% endif %}
+</p>
+{% endblock %}

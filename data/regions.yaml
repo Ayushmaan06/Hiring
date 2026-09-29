@@ -1,0 +1,91 @@
+# Region code -> member city/area names. Codes: IN-<state>-<metro>.
+# Seed covers the major Indian engineering hubs; extend as roles come in
+# from other cities (IMPLEMENTATION.md 1.4 — do not attempt completeness).
+
+IN-DL-NCR:
+  - Delhi
+  - New Delhi
+  - Gurgaon
+  - Gurugram
+  - Noida
+  - Greater Noida
+  - Faridabad
+  - Ghaziabad
+
+IN-KA-BLR:
+  - Bangalore
+  - Bengaluru
+  - Whitefield
+  - Electronic City
+
+IN-MH-MUM:
+  - Mumbai
+  - Navi Mumbai
+  - Thane
+
+IN-MH-PUN:
+  - Pune
+  - Pimpri
+  - Chinchwad
+
+IN-TG-HYD:
+  - Hyderabad
+  - Secunderabad
+  - Gachibowli
+
+IN-TN-CHE:
+  - Chennai
+
+IN-WB-KOL:
+  - Kolkata
+
+IN-GJ-AHM:
+  - Ahmedabad
+  - Gandhinagar
+
+IN-RJ-JAI:
+  - Jaipur
+
+IN-KL-KOC:
+  - Kochi
+  - Cochin
+  - Ernakulam
+
+IN-REMOTE:
+  - Remote
+  - Work From Home
+  - WFH
+
+# --- Coarser tiers -----------------------------------------------------------
+# Codes are hierarchical (`IN` > `IN-KA` > `IN-KA-BLR`) and the gate matches on
+# prefixes, so a profile that lists only "Karnataka" is not ruled out for a
+# Bangalore role, while one that lists "Punjab" is. Without these tiers a
+# state-level location resolves to nothing and the location gate never fires.
+
+IN: [India]
+
+IN-KA: [Karnataka]
+IN-MH: [Maharashtra]
+IN-TG: [Telangana]
+IN-TN: [Tamil Nadu]
+IN-DL: [Delhi]
+IN-HR: [Haryana]
+IN-UP: [Uttar Pradesh]
+IN-WB: [West Bengal]
+IN-GJ: [Gujarat]
+IN-RJ: [Rajasthan]
+IN-KL: [Kerala]
+IN-PB: [Punjab]
+IN-AP: [Andhra Pradesh]
+IN-MP: [Madhya Pradesh]
+IN-BR: [Bihar]
+IN-OD: [Odisha, Orissa]
+IN-JH: [Jharkhand]
+IN-CG: [Chhattisgarh]
+IN-UK: [Uttarakhand]
+IN-HP: [Himachal Pradesh]
+IN-AS: [Assam]
+IN-GA: [Goa]
+IN-JK: [Jammu and Kashmir]
+IN-CH: [Chandigarh]
+IN-PY: [Puducherry, Pondicherry]

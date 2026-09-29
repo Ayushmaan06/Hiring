@@ -1,0 +1,794 @@
+<title>Running Hiring Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ink:        #14202b;
+    --slate:      #4d5f6d;
+    --faint:      #7c8b96;
+    --paper:      #f6f8f9;
+    --surface:    #ffffff;
+    --rule:       #dbe3e7;
+    --accent:     #0f6068;
+    --accent-soft:#e2eff0;
+    --caution:    #9a5a0b;
+    --caution-soft:#fbf1e0;
+    --stop:       #a12e23;
+    --stop-soft:  #fbeae7;
+    --shadow:     0 1px 2px rgba(20,32,43,.06), 0 8px 24px -18px rgba(20,32,43,.35);
+    --measure:    66ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink:        #e5ecef;
+      --slate:      #a9b8c1;
+      --faint:      #7d8f9a;
+      --paper:      #0e1519;
+      --surface:    #16212a;
+      --rule:       #27353e;
+      --accent:     #63b8b0;
+      --accent-soft:#132a2c;
+      --caution:    #d9a45c;
+      --caution-soft:#2a2117;
+      --stop:       #e58a7d;
+      --stop-soft:  #2b1a17;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink:        #e5ecef;
+    --slate:      #a9b8c1;
+    --faint:      #7d8f9a;
+    --paper:      #0e1519;
+    --surface:    #16212a;
+    --rule:       #27353e;
+    --accent:     #63b8b0;
+    --accent-soft:#132a2c;
+    --caution:    #d9a45c;
+    --caution-soft:#2a2117;
+    --stop:       #e58a7d;
+    --stop-soft:  #2b1a17;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 78ch; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* --- masthead ------------------------------------------------------- */
+  header.masthead {
+    padding: 56px 0 28px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: "Zilla Slab", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(34px, 6vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -.015em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 19px;
+    color: var(--slate);
+    max-width: var(--measure);
+    margin: 0;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+    margin-top: 24px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--faint);
+  }
+  .meta b { color: var(--slate); font-weight: 600; }
+
+  /* --- part navigation ------------------------------------------------ */
+  nav.parts {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 44px;
+  }
+  nav.parts ol {
+    max-width: 78ch;
+    margin: 0 auto;
+    padding: 10px 24px;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+  }
+  nav.parts a { color: var(--slate); text-decoration: none; border-bottom: 1px solid transparent; }
+  nav.parts a:hover, nav.parts a:focus-visible { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* --- sections ------------------------------------------------------- */
+  section { margin-top: 56px; }
+  .part-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 6px;
+  }
+  h2 {
+    font-family: "Zilla Slab", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(25px, 3.4vw, 33px);
+    line-height: 1.15;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: "Zilla Slab", Georgia, serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 38px 0 10px;
+  }
+  p, li { max-width: var(--measure); }
+  p { margin: 0 0 16px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  /* --- the two ground rules ------------------------------------------ */
+  .ground {
+    display: grid;
+    gap: 18px;
+    margin: 34px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: ground;
+  }
+  .ground li {
+    counter-increment: ground;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 18px 22px 18px 20px;
+    box-shadow: var(--shadow);
+    max-width: none;
+  }
+  .ground li::before {
+    content: counter(ground);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .ground p:last-child { margin-bottom: 0; }
+
+  /* --- numbered / lettered steps -------------------------------------- */
+  .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 4px 46px;
+    margin-bottom: 30px;
+    max-width: none;
+  }
+  .steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--surface);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .steps.alpha { counter-reset: alpha; }
+  .steps.alpha > li { counter-increment: alpha; }
+  .steps.alpha > li::before { content: counter(alpha, upper-alpha); }
+  .steps h3 { margin: 0 0 8px; font-size: 19px; }
+  .steps h3 .mins {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--faint);
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  .steps ul { margin: 0 0 14px; padding-left: 20px; }
+  .steps ul li { margin-bottom: 6px; }
+
+  /* --- spoken lines --------------------------------------------------- */
+  .say {
+    margin: 0 0 16px;
+    padding: 16px 20px 16px 22px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    font-size: 17.5px;
+    max-width: none;
+  }
+  .say::before {
+    content: "Say";
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .say p { margin: 0 0 10px; max-width: var(--measure); }
+  .say p:last-child { margin: 0; }
+
+  /* --- commands ------------------------------------------------------- */
+  .cmd {
+    position: relative;
+    margin: 0 0 18px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .cmd .shell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px 6px 14px;
+    border-bottom: 1px solid var(--rule);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .cmd pre {
+    margin: 0;
+    padding: 14px;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .cmd button {
+    font: inherit;
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 3px 9px;
+    cursor: pointer;
+  }
+  .cmd button:hover { border-color: var(--accent); }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .88em;
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* --- tables --------------------------------------------------------- */
+  .table-scroll { overflow-x: auto; margin: 0 0 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--rule); }
+  th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  td:first-child { padding-right: 20px; }
+  td code { white-space: nowrap; }
+
+  /* --- callouts ------------------------------------------------------- */
+  .callout {
+    margin: 0 0 20px;
+    padding: 16px 20px;
+    border-radius: 2px;
+    font-size: 16px;
+    max-width: none;
+  }
+  .callout .tag {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .callout p { margin: 0 0 10px; }
+  .callout p:last-child { margin: 0; }
+  .callout.careful { background: var(--caution-soft); border-left: 3px solid var(--caution); }
+  .callout.careful .tag { color: var(--caution); }
+  .callout.never { background: var(--stop-soft); border-left: 3px solid var(--stop); }
+  .callout.never .tag { color: var(--stop); }
+
+  .plain { list-style: none; padding: 0; margin: 0 0 18px; }
+  .plain li {
+    padding: 12px 0 12px 0;
+    border-bottom: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+  .plain li:first-child { padding-top: 0; }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 22px;
+    border-top: 2px solid var(--ink);
+    font-size: 15px;
+    color: var(--slate);
+  }
+  footer p { max-width: var(--measure); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  @media print {
+    nav.parts { display: none; }
+    body { background: #fff; color: #000; font-size: 11pt; }
+    .cmd button { display: none; }
+    section { break-inside: avoid-page; }
+  }
+</style>
+
+<nav class="parts">
+  <ol>
+    <li><a href="#demo">1 · Demo</a></li>
+    <li><a href="#setup">2 · Setup</a></li>
+    <li><a href="#daily">3 · Day to day</a></li>
+    <li><a href="#wrong">4 · When it looks wrong</a></li>
+    <li><a href="#refuses">5 · What it refuses</a></li>
+  </ol>
+</nav>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Handover · Hiring Intelligence</p>
+  <h1>Running Hiring Intelligence</h1>
+  <p class="standfirst">
+    Setting it up, demonstrating it, and working with it every day. Written for someone who has never
+    opened the code and does not intend to — everything here is copy-paste.
+  </p>
+  <div class="meta">
+    <span><b>Operator</b> Saum</span>
+    <span><b>Runs on</b> one Windows machine</span>
+    <span><b>Longer version</b> RUNBOOK.md</span>
+    <span><b>Handed over</b> 2 September 2026</span>
+  </div>
+</header>
+
+<ol class="ground">
+  <li>
+    <p><strong>The tool reads LinkedIn profiles through your own signed-in browser window.</strong>
+    Not a fake account, not a stored password — a real Edge window you open and sign into yourself.
+    So that window has to be open on the machine running the tool, and <em>your</em> account is the one
+    that carries the risk. It is capped at 30 profiles per 24 hours and paced at about 25 seconds each
+    for exactly that reason.</p>
+  </li>
+  <li>
+    <p><strong>It finds fewer people than a LinkedIn search, on purpose.</strong> Twenty people worth
+    contacting beats five thousand rows. If a search returns twelve people, that is not a fault.</p>
+  </li>
+</ol>
+
+<!-- ================= PART 1 ================= -->
+<section id="demo">
+  <p class="part-label">Part 1</p>
+  <h2>The demo, end to end</h2>
+  <p>
+    About twelve minutes. The one thing that can go wrong live is timing: reading profiles takes
+    ~25&nbsp;seconds each, so a role started from scratch will not have a ranked list to show for
+    several minutes. So you show two roles — one you prepared, one you run live.
+  </p>
+
+  <h3>Before they arrive</h3>
+  <ol class="steps">
+    <li>Start everything (Part 2, step 8) and sign in.</li>
+    <li>Open the Edge automation window and check LinkedIn is signed in (Part 2, step 7).</li>
+    <li><strong>Have one finished role ready</strong> — searched, <em>and</em> with 8–10 profiles
+      already read. This is the one you show the ranked list on.</li>
+    <li>Have a second, fresh job description in a text file, ready to paste. This is the one you run live.</li>
+    <li>Check <code>/admin/health</code> is green and note how many reads are left today. If it says
+      0, the live read in section D will refuse — reschedule, or demo without it.</li>
+  </ol>
+
+  <h3>The walk-through</h3>
+  <ol class="steps alpha">
+    <li>
+      <h3>What problem does this solve<span class="mins">1 min · no screen</span></h3>
+      <div class="say">
+        <p>“A job description goes in, and a ranked shortlist comes out — where every line about a
+        person has a link to where we read it. It does not guess. If it cannot show you the source,
+        it does not make the claim.”</p>
+      </div>
+    </li>
+    <li>
+      <h3>Paste a job description<span class="mins">2 min</span></h3>
+      <p><strong>New role</strong> → paste the job description → <strong>Read it</strong>. Point at
+      the form it fills in: job titles, must-have skills, locations, years.</p>
+      <div class="say">
+        <p>“It read the description and filled this in. It is a draft — I get the final say, and
+        nothing searches until I confirm. Notice locations are checkboxes: it will not go looking in
+        a city I did not tick.”</p>
+      </div>
+      <p>Tick a city if none is set, then <strong>Find candidates</strong>.</p>
+    </li>
+    <li>
+      <h3>The search runs<span class="mins">2 min</span></h3>
+      <p>The page fills in on its own. While it does:</p>
+      <div class="say">
+        <p>“It is searching LinkedIn the way you or I would from Google — public search results only,
+        no account involved at this step. Each result gets a first pass: right city, right kind of
+        role. The ones that fail that pass are listed too, with the reason, so you can see when I
+        have been too strict.”</p>
+      </div>
+      <p>Scroll to <strong>“N we did not open”</strong> and read one reason out loud.</p>
+    </li>
+    <li>
+      <h3>Reading profiles<span class="mins">2 min</span></h3>
+      <p>Scroll to <strong>Read LinkedIn profiles</strong>. Point at the budget line.</p>
+      <div class="say">
+        <p>“This is the rationed part. Thirty profile reads per 24 hours, shared across every role —
+        ten spent here are ten unavailable tomorrow morning. It is deliberately slow, about
+        25&nbsp;seconds a person, because that is what keeps my LinkedIn account healthy.”</p>
+      </div>
+      <p>Set the number to <strong>2</strong>, press <strong>Read them now</strong>.</p>
+      <div class="say">
+        <p>“It is reading through that Edge window over there — a real signed-in browser, one profile
+        at a time. It tells me which person it is on. If LinkedIn ever shows it a wall, it stops,
+        switches itself off, and says so on this page. It will never quietly return nothing and look
+        successful.”</p>
+      </div>
+      <p>Leave it running and move to the finished role for the payoff.</p>
+    </li>
+    <li>
+      <h3>The ranked list<span class="mins">3 min</span></h3>
+      <p>Open the role you prepared. This is the part that matters.</p>
+      <div class="say">
+        <p>“Three groups, and the difference between them is the whole point.”</p>
+      </div>
+      <ul>
+        <li><strong>Ranked</strong> — checked, and matched.</li>
+        <li><strong>Ruled out</strong> — checked, did not match, each with a reason.</li>
+        <li><strong>Not looked at yet</strong> — nobody has read them.</li>
+      </ul>
+      <div class="say">
+        <p>“That third group used to say ‘no sign of Python’ for people nobody had read — a claim
+        about someone we never opened. It does not do that any more.”</p>
+      </div>
+      <p>Click a person to open their card.</p>
+      <div class="say">
+        <p>“Every line has a source link and the exact words we read. And look at the labels — ‘Says
+        so’ is what someone wrote about themselves. ‘Proven’ is something we could verify in their
+        public work. Those two never get added together, all the way to this screen.”</p>
+        <p>“The ranking is arithmetic — five things, fixed weights, the same answer every time. The
+        sentence explaining it is written by an AI, but the AI never touches the number.”</p>
+      </div>
+    </li>
+    <li>
+      <h3>Close<span class="mins">1 min</span></h3>
+      <div class="say">
+        <p>“It will not collect age, gender, caste, religion, marital status or photographs. Not
+        ‘collects but ignores’ — it does not read them at all. And it never stores anyone's email
+        address in plain text. We identify people; you contact them the normal way.”</p>
+      </div>
+      <p>Then go back to the live role from section D — the two profiles will have finished and folded
+      into the ranking. That is the loop, start to end.</p>
+    </li>
+  </ol>
+
+  <div class="callout never">
+    <span class="tag">Not in a demo</span>
+    <p>Do not start a read with a big number to look impressive — it is minutes of watching a
+    progress line. Do not re-read the same people to fill time; it spends the daily budget for
+    nothing. And if it says <strong>Stopped</strong>, move to the prepared role and talk about that
+    instead — never turn it back on to try again in front of an audience.</p>
+  </div>
+</section>
+
+<!-- ================= PART 2 ================= -->
+<section id="setup">
+  <p class="part-label">Part 2</p>
+  <h2>Setting it up on your machine</h2>
+  <p>Once. About half an hour, most of it downloads.</p>
+
+  <ol class="steps">
+    <li>
+      <h3>Install these</h3>
+      <div class="table-scroll">
+        <table>
+          <tr><th>What</th><th>Where</th><th>Note</th></tr>
+          <tr><td>Docker Desktop</td><td>docker.com</td><td>Must be <strong>running</strong> before the tool starts — look for the whale in the tray</td></tr>
+          <tr><td>Python 3.13</td><td>python.org</td><td>Tick “Add to PATH” during install</td></tr>
+          <tr><td><code>uv</code></td><td><code>pip install uv</code></td><td>Installs the tool's dependencies</td></tr>
+          <tr><td>Git</td><td>git-scm.com</td><td>To get the code</td></tr>
+          <tr><td>Microsoft Edge</td><td>Already on Windows</td><td>The automation window</td></tr>
+        </table>
+      </div>
+    </li>
+
+    <li>
+      <h3>Get the code</h3>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell</span><button type="button" data-copy>Copy</button></div>
+        <pre>git clone &lt;repo-url&gt; D:\hiring-intelligence
+cd D:\hiring-intelligence
+uv sync</pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>Start the database</h3>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell</span><button type="button" data-copy>Copy</button></div>
+        <pre>docker compose up -d
+python -m hi.db migrate</pre>
+      </div>
+      <p><code>migrate</code> prints a list of applied files. If it hangs, Docker Desktop is not
+      running yet.</p>
+    </li>
+
+    <li>
+      <h3>Make your login</h3>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell</span><button type="button" data-copy>Copy</button></div>
+        <pre>python -m hi.auth hash 'pick-a-real-password'</pre>
+      </div>
+      <p>Copy the line it prints.</p>
+    </li>
+
+    <li>
+      <h3>Fill in <code>.env</code></h3>
+      <p>Copy <code>.env.example</code> to <code>.env</code> and open it in Notepad — it explains
+      every line. You need:</p>
+      <div class="table-scroll">
+        <table>
+          <tr><th>Key</th><th>Required</th><th>What it does</th></tr>
+          <tr><td><code>HI_USERS</code></td><td>Yes</td><td>Your email, a colon, then the hash from step 4</td></tr>
+          <tr><td><code>SERPAPI_KEY</code></td><td>Yes</td><td>The search key — serpapi.com → API key. Without it, nothing is found</td></tr>
+          <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Optional</td><td>Reads job descriptions better. Without it, the form is still filled from keywords</td></tr>
+          <tr><td><code>GITHUB_TOKEN</code></td><td>Optional</td><td>Raises a rate limit. Without it things are slower, not broken</td></tr>
+        </table>
+      </div>
+      <div class="callout careful">
+        <span class="tag">Easy to miss</span>
+        <p><code>.env</code> is read <strong>once at startup</strong>. Restart the app after you
+        change anything in it, or you will be looking at the old value.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>Turn LinkedIn reading on</h3>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell</span><button type="button" data-copy>Copy</button></div>
+        <pre>python -m hi.adapters.linkedin_profile enable</pre>
+      </div>
+      <p>It ships switched off. This is the one command that says “yes, use my real account”, and it
+      records who ran it. Read what it prints.</p>
+    </li>
+
+    <li>
+      <h3>The LinkedIn window — the part people get wrong</h3>
+      <p>
+        One line, in PowerShell, <strong>from the repository folder</strong>, each time you want to
+        read profiles:
+      </p>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell · one line · run from the repo folder</span><button type="button" data-copy>Copy</button></div>
+        <pre>&amp; "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --remote-debugging-port=9222 --user-data-dir="$PWD\var\edge-automation"</pre>
+      </div>
+      <ul>
+        <li>The leading <code>&amp;</code> is required, and <code>$PWD</code> only resolves if you
+          are in the repository folder — <code>cd D:\hiring-intelligence</code> first. A full path
+          works just as well.</li>
+        <li>If that path errors, Edge is in the other standard location: drop the
+          <code>&nbsp;(x86)</code>.</li>
+        <li><code>--user-data-dir</code> is required too — Edge refuses remote debugging on your
+          normal profile.</li>
+        <li><strong>First time only:</strong> sign in to LinkedIn in that window. It stays signed in
+          afterwards; the profile lives under <code>var/</code>, which never reaches the repository.</li>
+        <li>Leave it open and <em>visible</em> while reading. Do not minimise it to a hidden desktop.</li>
+        <li>The role page prints this same command with the right path for the machine it is running
+          on — copy it from there if in doubt.</li>
+      </ul>
+      <div class="callout never">
+        <span class="tag">Never</span>
+        <p>This is a separate <em>browser profile</em>, not a separate <em>account</em>. Never sign a
+        made-up, second or shared account into it. It is banned, it is the fact pattern that gets
+        companies sued rather than blocked, and it returns <em>less</em> data — LinkedIn shows less
+        history to low-standing accounts.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>Start the tool</h3>
+      <div class="cmd">
+        <div class="shell"><span>PowerShell</span><button type="button" data-copy>Copy</button></div>
+        <pre>uvicorn hi.web:app</pre>
+      </div>
+      <p>Open <code>http://127.0.0.1:8000</code> and sign in with the email and password from
+      steps 4–5. That one command is the whole application — the background work runs inside it.
+      <strong>Leave that window open while you use the tool;</strong> closing it stops everything
+      mid-search.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ================= PART 3 ================= -->
+<section id="daily">
+  <p class="part-label">Part 3</p>
+  <h2>Working, day to day</h2>
+  <ol class="steps">
+    <li>Start Docker Desktop, or leave it running at login.</li>
+    <li><code>docker compose up -d</code></li>
+    <li><code>uvicorn hi.web:app</code></li>
+    <li>Open the Edge automation window when you intend to read profiles.</li>
+    <li>Work in the browser: <strong>New role</strong> → paste → confirm → wait →
+      <strong>Read them now</strong> → shortlist.</li>
+  </ol>
+
+  <h3>The rhythm the budget forces</h3>
+  <p>
+    Thirty reads per rolling 24 hours. A role with forty people found cannot be fully read in one
+    day, and that is the intended shape: read the top ten, look at the ranking, decide whether the
+    role's must-have skills were right, and only then spend more. If the top ten are all wrong,
+    editing the role beats reading thirty more people.
+  </p>
+
+  <h3>Two buttons worth knowing</h3>
+  <ul class="plain">
+    <li><strong>Read them now</strong> — reads the next few profiles through the Edge window. Refuses
+      in a sentence if the window is shut, the budget is spent, or a read is already running.</li>
+    <li><strong>Find more people</strong> — searches one page deeper <em>and</em> re-checks everyone
+      already found against the role as it stands. The re-check is free and instant; the deeper
+      search costs searches and a few minutes.</li>
+  </ul>
+
+  <h3>Upkeep</h3>
+  <ul class="plain">
+    <li><strong>Weekly</strong> — glance at <code>/admin/health</code>. Green means it has actually
+      produced something recently, not merely that nothing crashed.</li>
+    <li><strong>Monthly</strong> — check the SerpAPI quota before it runs out mid-search, and the
+      “saved pages on disk” figure on the same page.</li>
+  </ul>
+</section>
+
+<!-- ================= PART 4 ================= -->
+<section id="wrong">
+  <p class="part-label">Part 4</p>
+  <h2>When something looks wrong</h2>
+  <p>
+    <code>RUNBOOK.md</code> is written symptom-first for exactly this. These four are the ones you
+    are most likely to meet.
+  </p>
+  <div class="table-scroll">
+    <table>
+      <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
+      <tr>
+        <td><strong>Stopped: …</strong> on the reading panel</td>
+        <td>LinkedIn showed a wall, and reading switched itself off</td>
+        <td><strong>Do not turn it back on today.</strong> Use LinkedIn normally for a while. If it
+          happens twice, stop using the reading feature and say so — the tool works without it
+          (<code>RUNBOOK.md</code> §8)</td>
+      </tr>
+      <tr>
+        <td>“The LinkedIn window is not open”</td>
+        <td>The step 7 window is closed, or is on a different machine from the tool</td>
+        <td>Open it, then press the button again</td>
+      </tr>
+      <tr>
+        <td>“All 30 profile reads are used up”</td>
+        <td>Normal</td>
+        <td>Nothing. It frees up gradually and the page names the time — it is a rolling window, not
+          a midnight reset</td>
+      </tr>
+      <tr>
+        <td>“Searching…” forever</td>
+        <td>The PowerShell window running the app was closed</td>
+        <td>Restart <code>uvicorn hi.web:app</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="callout careful">
+    <span class="tag">Do this once</span>
+    <p>Back up, and then <em>restore</em> that backup into a scratch database — <code>RUNBOOK.md</code>
+    §7 has the commands, including the version that runs inside Docker so you need no Postgres tools
+    installed. An unrestored backup is a rumour.</p>
+  </div>
+</section>
+
+<!-- ================= PART 5 ================= -->
+<section id="refuses">
+  <p class="part-label">Part 5</p>
+  <h2>What it refuses to do, and why that is not a bug</h2>
+  <ul class="plain">
+    <li><strong>No age, gender, caste, religion, marital status or photographs.</strong> Never
+      collected, so they can never leak into a ranking.</li>
+    <li><strong>No plain-text email addresses.</strong> Stored as a one-way hash only.</li>
+    <li><strong>No second LinkedIn account, no proxies, no captcha solving.</strong> If a source needs
+      those, we drop the source.</li>
+    <li><strong>The caps live in the code, not in a settings file.</strong> Thirty a day, one at a
+      time, twenty seconds apart, never a hidden window. Not adjustable by design — they are what
+      keeps the account usable.</li>
+    <li><strong>It will not merge “says they know Python” with “has eight years of public Python.”</strong>
+      Different facts, kept visibly different all the way to the screen.</li>
+  </ul>
+  <p>
+    If someone asks for one of these to be changed, that is a conversation with a decision recorded
+    in the architecture document — not a settings change.
+  </p>
+</section>
+
+<footer>
+  <p>
+    This page mirrors the “Handover” section at the bottom of <code>README.md</code>. For
+    symptom-first fixes see
+    <code>RUNBOOK.md</code>; for what the product is and how ranking works, <code>docs/PRD.md</code>
+    §1–§7 assume no technical knowledge.
+  </p>
+</footer>
+
+</div>
+
+<script>
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".cmd").querySelector("pre");
+      var done = function () {
+        var was = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(function () { btn.textContent = was; }, 1400);
+      };
+      try {
+        navigator.clipboard.writeText(pre.textContent).then(done, select);
+      } catch (e) {
+        select();
+      }
+      function select() {
+        // Clipboard blocked — select the text so one keystroke still copies it.
+        var range = document.createRange();
+        range.selectNodeContents(pre);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+  });
+</script>

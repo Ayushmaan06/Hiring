@@ -1,0 +1,318 @@
+# Canonical skill name -> kind + aliases that don't already normalise to the same
+# key (normalisation lowercases and strips punctuation, so "Node.js" == "nodejs"
+# == "NODE JS" for free — aliases here are for genuinely different spellings,
+# e.g. "K8s" for "Kubernetes"). Seeded for engineering/data/ML roles, ~150
+# entries; do not attempt completeness (IMPLEMENTATION.md 1.4).
+
+# --- Languages ---------------------------------------------------------
+
+Python: {kind: language}
+JavaScript: {kind: language, aliases: [JS]}
+TypeScript: {kind: language, aliases: [TS]}
+Java: {kind: language}
+Go: {kind: language, aliases: [Golang]}
+Rust: {kind: language}
+"C++": {kind: language, aliases: [Cpp]}
+C: {kind: language}
+"C#": {kind: language, aliases: [CSharp]}
+Ruby: {kind: language}
+PHP: {kind: language}
+Kotlin: {kind: language}
+Swift: {kind: language}
+Scala: {kind: language}
+R: {kind: language}
+SQL: {kind: language}
+Bash: {kind: language, aliases: [Shell Scripting, Shell]}
+HTML: {kind: language}
+CSS: {kind: language}
+MATLAB: {kind: language}
+Julia: {kind: language}
+Elixir: {kind: language}
+Perl: {kind: language}
+Dart: {kind: language}
+Haskell: {kind: language}
+Lua: {kind: language}
+
+# --- Frameworks and libraries -------------------------------------------
+
+Django: {kind: framework, implies: [Python]}
+Flask: {kind: framework, implies: [Python]}
+FastAPI: {kind: framework, implies: [Python]}
+React: {kind: framework, aliases: [ReactJS], implies: [JavaScript]}
+Vue: {kind: framework, aliases: [VueJS], implies: [JavaScript]}
+Angular: {kind: framework, aliases: [AngularJS], implies: [TypeScript]}
+Svelte: {kind: framework}
+Next.js: {kind: framework, aliases: [NextJS, Next], implies: [JavaScript]}
+Nuxt.js: {kind: framework, aliases: [NuxtJS, Nuxt], implies: [JavaScript]}
+Node.js: {kind: framework, aliases: [Node, NodeJS], implies: [JavaScript]}
+Express: {kind: framework, aliases: [ExpressJS, Express.js], implies: [JavaScript]}
+NestJS: {kind: framework, aliases: [Nest.js, Nest], implies: [TypeScript]}
+Spring Boot: {kind: framework, aliases: [Spring], implies: [Java]}
+.NET: {kind: framework, aliases: [DotNet, ASP.NET], implies: [C#]}
+Ruby on Rails: {kind: framework, aliases: [Rails], implies: [Ruby]}
+Laravel: {kind: framework, implies: [PHP]}
+jQuery: {kind: framework, implies: [JavaScript]}
+Redux: {kind: framework, implies: [JavaScript]}
+Tailwind CSS: {kind: framework, aliases: [Tailwind]}
+Bootstrap: {kind: framework}
+GraphQL: {kind: framework}
+gRPC: {kind: framework}
+TensorFlow: {kind: framework}
+PyTorch: {kind: framework, implies: [Python]}
+Keras: {kind: framework, implies: [Python]}
+scikit-learn: {kind: framework, aliases: [sklearn], implies: [Python]}
+Pandas: {kind: framework, implies: [Python]}
+NumPy: {kind: framework, implies: [Python]}
+SciPy: {kind: framework, implies: [Python]}
+Hugging Face Transformers: {kind: framework, aliases: [HuggingFace, Transformers]}
+LangChain: {kind: framework}
+XGBoost: {kind: framework}
+OpenCV: {kind: framework}
+Celery: {kind: framework, implies: [Python]}
+Selenium: {kind: framework}
+Playwright: {kind: framework}
+Cypress: {kind: framework}
+Pytest: {kind: framework, implies: [Python]}
+JUnit: {kind: framework}
+Jest: {kind: framework}
+
+# --- Datastores and infra tools -----------------------------------------
+
+PostgreSQL: {kind: tool, aliases: [Postgres]}
+MySQL: {kind: tool}
+SQLite: {kind: tool}
+MongoDB: {kind: tool, aliases: [Mongo]}
+Redis: {kind: tool}
+Elasticsearch: {kind: tool, aliases: [ELK]}
+Cassandra: {kind: tool, aliases: [Apache Cassandra]}
+DynamoDB: {kind: tool}
+Snowflake: {kind: tool}
+BigQuery: {kind: tool}
+Redshift: {kind: tool}
+ClickHouse: {kind: tool}
+Kafka: {kind: tool, aliases: [Apache Kafka]}
+RabbitMQ: {kind: tool}
+Airflow: {kind: tool, aliases: [Apache Airflow]}
+Spark: {kind: tool, aliases: [Apache Spark, PySpark]}
+Hadoop: {kind: tool, aliases: [Apache Hadoop]}
+dbt: {kind: tool}
+Docker: {kind: tool}
+Kubernetes: {kind: tool, aliases: [K8s]}
+Terraform: {kind: tool}
+Ansible: {kind: tool}
+Pulumi: {kind: tool}
+Jenkins: {kind: tool}
+GitHub Actions: {kind: tool}
+CircleCI: {kind: tool}
+GitLab CI: {kind: tool}
+Nginx: {kind: tool}
+Apache HTTP Server: {kind: tool, aliases: [Apache]}
+AWS: {kind: tool, aliases: [Amazon Web Services]}
+GCP: {kind: tool, aliases: [Google Cloud Platform, Google Cloud]}
+Azure: {kind: tool, aliases: [Microsoft Azure]}
+Prometheus: {kind: tool}
+Grafana: {kind: tool}
+Datadog: {kind: tool}
+Sentry: {kind: tool}
+Vault: {kind: tool, aliases: [HashiCorp Vault]}
+Git: {kind: tool}
+Webpack: {kind: tool}
+Vite: {kind: tool}
+Postman: {kind: tool}
+Jupyter: {kind: tool, aliases: [Jupyter Notebook]}
+
+# --- Technical domains ---------------------------------------------------
+
+Machine Learning: {kind: domain, aliases: [ML]}
+Deep Learning: {kind: domain, aliases: [DL]}
+Natural Language Processing: {kind: domain, aliases: [NLP]}
+Computer Vision: {kind: domain, aliases: [CV]}
+Reinforcement Learning: {kind: domain, aliases: [RL]}
+Large Language Models: {kind: domain, aliases: [LLM, LLMs]}
+Data Engineering: {kind: domain}
+Data Science: {kind: domain}
+Distributed Systems: {kind: domain}
+Backend Development: {kind: domain, aliases: [Backend]}
+Frontend Development: {kind: domain, aliases: [Frontend]}
+Full Stack Development: {kind: domain, aliases: [Full Stack, Fullstack]}
+Mobile Development: {kind: domain, aliases: [Mobile]}
+DevOps: {kind: domain}
+Site Reliability Engineering: {kind: domain, aliases: [SRE]}
+Cloud Computing: {kind: domain, aliases: [Cloud]}
+Cybersecurity: {kind: domain, aliases: [Security, InfoSec]}
+Embedded Systems: {kind: domain}
+Blockchain: {kind: domain}
+Game Development: {kind: domain}
+Robotics: {kind: domain}
+
+# --- Practices -------------------------------------------------------------
+
+Microservices: {kind: practice}
+REST APIs: {kind: practice, aliases: [REST, RESTful APIs]}
+System Design: {kind: practice}
+CI/CD: {kind: practice, aliases: [Continuous Integration, Continuous Deployment]}
+Test-Driven Development: {kind: practice, aliases: [TDD]}
+Agile: {kind: practice, aliases: [Scrum]}
+Code Review: {kind: practice}
+ETL: {kind: practice, aliases: [ETL Pipelines]}
+MLOps: {kind: practice}
+A/B Testing: {kind: practice}
+Data Modeling: {kind: practice, aliases: [Data Modelling]}
+Database Design: {kind: practice}
+Performance Optimization: {kind: practice, aliases: [Performance Optimisation, Performance Tuning]}
+Load Testing: {kind: practice}
+Infrastructure as Code: {kind: practice, aliases: [IaC]}
+
+# ==========================================================================
+# Non-technical / MBA roles — added 2026-08-27
+# ==========================================================================
+# The canon above is engineering-only, so before this every MBA candidate failed
+# `must_have_skills` for want of a vocabulary: of 23 common business skills exactly
+# one ("SQL") resolved. Same shape as the rest of the file. British and American
+# spellings both appear because Indian profiles use both, and normalisation only
+# handles case and punctuation, not "-ise" against "-ize".
+
+# --- Business tools ---------------------------------------------------------
+
+Excel: {kind: tool, aliases: [Microsoft Excel, MS Excel, Advanced Excel]}
+PowerPoint: {kind: tool, aliases: [Microsoft PowerPoint, MS PowerPoint]}
+Google Sheets: {kind: tool}
+Tableau: {kind: tool}
+Power BI: {kind: tool, aliases: [PowerBI, Microsoft Power BI]}
+Looker: {kind: tool}
+Google Analytics: {kind: tool, aliases: [GA4]}
+Mixpanel: {kind: tool}
+Amplitude: {kind: tool}
+Salesforce: {kind: tool, aliases: [Salesforce CRM, SFDC]}
+HubSpot: {kind: tool}
+Zoho CRM: {kind: tool, aliases: [Zoho]}
+SAP: {kind: tool, aliases: [SAP ERP]}
+Oracle ERP: {kind: tool}
+NetSuite: {kind: tool}
+Tally: {kind: tool, aliases: [Tally ERP]}
+QuickBooks: {kind: tool}
+Zendesk: {kind: tool}
+Marketo: {kind: tool}
+Bloomberg Terminal: {kind: tool, aliases: [Bloomberg]}
+Capital IQ: {kind: tool, aliases: [CapIQ]}
+FactSet: {kind: tool}
+Jira: {kind: tool}
+Confluence: {kind: tool}
+Asana: {kind: tool}
+Notion: {kind: tool}
+Figma: {kind: tool}
+
+# --- Finance ----------------------------------------------------------------
+
+Financial Modeling: {kind: practice, aliases: [Financial Modelling, Three Statement Modeling]}
+Valuation: {kind: practice, aliases: [DCF, Discounted Cash Flow, Company Valuation]}
+Financial Analysis: {kind: practice}
+Financial Reporting: {kind: practice}
+Budgeting: {kind: practice, aliases: [Budget Management, Budget Planning]}
+Forecasting: {kind: practice, aliases: [Financial Forecasting, Demand Forecasting]}
+Due Diligence: {kind: practice}
+Mergers and Acquisitions: {kind: practice, aliases: [M&A, Mergers and Acquisition]}
+Fundraising: {kind: practice, aliases: [Capital Raising]}
+Treasury Management: {kind: practice, aliases: [Treasury]}
+Taxation: {kind: practice, aliases: [Tax, Direct Tax, Indirect Tax, GST]}
+Auditing: {kind: practice, aliases: [Audit, Internal Audit, Statutory Audit]}
+Risk Management: {kind: practice}
+Investment Banking: {kind: domain, aliases: [IB]}
+Private Equity: {kind: domain, aliases: [PE]}
+Venture Capital: {kind: domain, aliases: [VC]}
+Equity Research: {kind: domain}
+Corporate Finance: {kind: domain}
+Financial Planning and Analysis: {kind: domain, aliases: [FP&A, FPA]}
+Credit Analysis: {kind: practice, aliases: [Credit Underwriting, Underwriting]}
+Wealth Management: {kind: domain}
+
+# --- Strategy and consulting ------------------------------------------------
+
+Business Strategy: {kind: practice, aliases: [Strategy, Corporate Strategy, Strategic Planning, Corporate Strategy Experience]}
+Market Research: {kind: practice, aliases: [Market Study, Primary Research, Secondary Research]}
+Competitive Analysis: {kind: practice, aliases: [Competitor Analysis, Market Intelligence]}
+Business Analysis: {kind: practice, aliases: [Business Analytics, Business Analytics Experience]}
+Data Analysis: {kind: practice, aliases: [Data Analytics, Analytics]}
+Management Consulting: {kind: domain, aliases: [Consulting, Strategy Consulting, Management Consulting Experience]}
+Go-to-Market Strategy: {kind: practice, aliases: [GTM, Go To Market, Go-to-Market]}
+Business Development: {kind: practice, aliases: [BD, Biz Dev]}
+Profit and Loss Management: {kind: practice, aliases: [P&L, P&L Management, PnL]}
+Change Management: {kind: practice}
+Process Improvement: {kind: practice, aliases: [Business Process Improvement]}
+Six Sigma: {kind: practice, aliases: [Lean Six Sigma, Six Sigma Black Belt, Six Sigma Green Belt]}
+Lean Manufacturing: {kind: practice, aliases: [Lean]}
+
+# --- Sales and marketing ----------------------------------------------------
+
+B2B Sales: {kind: practice, aliases: [Enterprise Sales, B2B]}
+B2C Sales: {kind: practice, aliases: [B2C, Retail Sales]}
+Key Account Management: {kind: practice, aliases: [Account Management, Key Accounts]}
+Channel Sales: {kind: practice, aliases: [Channel Management, Distribution Management]}
+Sales Operations: {kind: practice, aliases: [Sales Ops, Revenue Operations, RevOps]}
+Negotiation: {kind: practice, aliases: [Contract Negotiation]}
+Digital Marketing: {kind: practice, aliases: [Online Marketing]}
+Performance Marketing: {kind: practice, aliases: [Paid Marketing, Paid Media, SEM]}
+Search Engine Optimization: {kind: practice, aliases: [SEO, Search Engine Optimisation]}
+Content Marketing: {kind: practice, aliases: [Content Strategy]}
+Brand Management: {kind: practice, aliases: [Branding, Brand Strategy]}
+Category Management: {kind: practice, aliases: [Category Growth]}
+Pricing Strategy: {kind: practice, aliases: [Pricing]}
+Customer Relationship Management: {kind: practice, aliases: [CRM]}
+Growth Marketing: {kind: practice, aliases: [Growth, Growth Hacking]}
+
+# --- Operations, product, people --------------------------------------------
+
+Supply Chain Management: {kind: domain, aliases: [Supply Chain, SCM]}
+Logistics: {kind: domain, aliases: [Logistics Management, Warehousing]}
+Procurement: {kind: practice, aliases: [Sourcing, Vendor Management, Purchase]}
+Demand Planning: {kind: practice, aliases: [Supply Planning, Inventory Planning]}
+Operations Management: {kind: domain, aliases: [Operations, Ops, Business Operations, Business Operations Experience]}
+Product Management: {kind: domain, aliases: [Product Owner, APM, Associate Product Manager]}
+Program Management: {kind: practice, aliases: [Programme Management]}
+Project Management: {kind: practice}
+Stakeholder Management: {kind: practice, aliases: [Stakeholder Engagement]}
+Team Leadership: {kind: practice, aliases: [People Management, Team Management]}
+Talent Acquisition: {kind: practice, aliases: [Recruitment, Recruiting, Hiring]}
+Performance Management: {kind: practice, aliases: [Appraisals]}
+Compensation and Benefits: {kind: practice, aliases: [Total Rewards]}
+Learning and Development: {kind: practice, aliases: [Training and Development]}
+HR Operations: {kind: domain, aliases: [HR Ops, Human Resources, HRBP]}
+
+# --- Sector domains ---------------------------------------------------------
+
+Fintech: {kind: domain, aliases: [Financial Technology]}
+FMCG: {kind: domain, aliases: [Consumer Goods, CPG]}
+E-commerce: {kind: domain, aliases: [Ecommerce, Online Retail]}
+Retail: {kind: domain}
+SaaS: {kind: domain, aliases: [Software as a Service]}
+Banking: {kind: domain, aliases: [BFSI]}
+Insurance: {kind: domain}
+Healthcare: {kind: domain, aliases: [Healthtech]}
+Edtech: {kind: domain, aliases: [Education Technology]}
+Manufacturing: {kind: domain}
+Real Estate: {kind: domain}
+Telecom: {kind: domain, aliases: [Telecommunications]}
+
+# --- Soft skills --------------------------------------------------------------
+
+Problem Solving: {kind: practice, aliases: [Analytical Skills, Analytical and Structured Problem-Solving, Structured Problem Solving]}
+Presentation Skills: {kind: practice}
+Communication Skills: {kind: practice, aliases: [Verbal Communication, Written Communication]}
+Business Acumen: {kind: practice, aliases: [Business Metrics, Financial Acumen, Understanding of Business Metrics and Financial Concepts]}
+
+# --- Company pedigree ---------------------------------------------------------
+
+Startup Experience: {kind: domain, aliases: [Tier-1 / Tier-2 Startup Experience, Tier-1 Startup Experience, Tier-2 Startup Experience, Tier 1 Startup Experience, Tier 2 Startup Experience]}
+
+# --- Professional qualifications --------------------------------------------
+# A qualification is a skill claim like any other and stays `self_reported` unless a
+# registry corroborates it. These are NOT education: `BANNED_SIGNALS` still refuses
+# college_name and graduation_year, and a CFA charter is not a degree.
+
+Chartered Financial Analyst: {kind: certification, aliases: [CFA]}
+Chartered Accountant: {kind: certification, aliases: [CA, ACA]}
+Certified Public Accountant: {kind: certification, aliases: [CPA]}
+Company Secretary: {kind: certification, aliases: [CS]}
+Financial Risk Manager: {kind: certification, aliases: [FRM]}
+Project Management Professional: {kind: certification, aliases: [PMP]}
+Cost and Management Accountant: {kind: certification, aliases: [CMA, ICWA]}

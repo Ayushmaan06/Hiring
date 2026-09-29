@@ -1,0 +1,93 @@
+{
+  "search_metadata": { "id": "fixture-0001", "status": "Success" },
+  "search_parameters": {
+    "engine": "google",
+    "q": "site:linkedin.com/in/ \"Backend Engineer\" (Bangalore OR Bengaluru)"
+  },
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "Chenthil Kumar - Senior Backend Engineer / Platform ...",
+      "link": "https://in.linkedin.com/in/chenthil-kumar-4178b144",
+      "snippet": "Senior Backend Engineer / Technical Architect. Prestine Technologies Pvt. Ltd. Mar 2022 - Present 4 years 6 months. Bengaluru, Karnataka, India. Working as a ...",
+      "rich_snippet": {
+        "top": {
+          "extensions": [
+            "Bengaluru, Karnataka, India",
+            "Senior Backend Engineer / Technical Architect",
+            "Prestine Technologies Pvt. Ltd."
+          ]
+        }
+      }
+    },
+    {
+      "position": 2,
+      "title": "Priya Nair - Backend Engineer - Swiggy",
+      "link": "https://www.linkedin.com/in/priya-nair-99887766",
+      "snippet": "Backend Engineer at Swiggy. Experience: Swiggy, Infosys ...",
+      "rich_snippet": {
+        "top": { "extensions": ["Bengaluru, Karnataka, India", "Backend Engineer", "Swiggy"] }
+      }
+    },
+    {
+      "position": 3,
+      "title": "Chenthil Kumar - Senior Backend Engineer / Platform ...",
+      "link": "https://linkedin.com/pub/chenthil-kumar-4178b144/1/2a/3b",
+      "snippet": "Duplicate of position 1 in the legacy /pub/ URL form.",
+      "rich_snippet": {
+        "top": {
+          "extensions": [
+            "Bengaluru, Karnataka, India",
+            "Senior Backend Engineer / Technical Architect",
+            "Prestine Technologies Pvt. Ltd."
+          ]
+        }
+      }
+    },
+    {
+      "position": 4,
+      "title": "Razorpay | LinkedIn",
+      "link": "https://www.linkedin.com/company/razorpay",
+      "snippet": "Razorpay is a full-stack financial solutions company."
+    },
+    {
+      "position": 5,
+      "title": "Arjun Menon - Backend Engineer - Zoho",
+      "link": "https://in.linkedin.com/in/arjun-menon-42",
+      "snippet": "Backend Engineer at Zoho.",
+      "rich_snippet": {
+        "top": { "extensions": ["Chennai, Tamil Nadu, India", "Backend Engineer", "Zoho"] }
+      }
+    },
+    {
+      "position": 6,
+      "title": "Sneha Gupta - Product Designer - Flipkart",
+      "link": "https://in.linkedin.com/in/sneha-gupta-design",
+      "snippet": "Product Designer at Flipkart.",
+      "rich_snippet": {
+        "top": { "extensions": ["Bengaluru, Karnataka, India", "Product Designer", "Flipkart"] }
+      }
+    },
+    {
+      "position": 7,
+      "title": "Backend Engineer jobs in Bengaluru | LinkedIn",
+      "link": "https://in.linkedin.com/jobs/backend-engineer-jobs-bengaluru",
+      "snippet": "Today's top 5,000+ Backend Engineer jobs in Bengaluru."
+    },
+    {
+      "position": 8,
+      "title": "Rajeev Nayan - Senior Java Backend Engineer | Spring Boot",
+      "link": "https://in.linkedin.com/in/rajeev-nayan-870620237",
+      "snippet": "Rajeev Nayan. Senior Java Backend Engineer | Spring Boot | Microservices ...",
+      "rich_snippet": {
+        "top": { "extensions": ["India", "Engineering Lead", "Persistent Systems"] }
+      }
+    },
+    {
+      "position": 9,
+      "title": "Vikram Iyer",
+      "link": "https://in.linkedin.com/in/vikram-iyer-77",
+      "snippet": "Bengaluru, Karnataka, India."
+    }
+  ]
+}

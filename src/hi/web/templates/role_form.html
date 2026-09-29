@@ -1,0 +1,90 @@
+{# Step 2: the parsed requirements as an editable form, never as raw data. #}
+<h2>Step 2 of 2 — check what we understood</h2>
+<p class="sub">We read the description. Correct anything that looks wrong before we search.</p>
+
+{% for b in draft.blocking %}
+  <div class="note bad">{{ b }}</div>
+{% endfor %}
+{% for w in draft.warnings %}
+  <div class="note warn">{{ w }}</div>
+{% endfor %}
+
+<form method="post" action="/roles">
+  <input type="hidden" name="jd_text" value="{{ jd_text }}">
+
+  <label for="title">Role name</label>
+  <input type="text" id="title" name="title"
+         value="{{ title or draft.spec.titles[0] if draft.spec.titles else '' }}" required>
+
+  <label for="titles">Job titles to search for</label>
+  <input type="text" id="titles" name="titles" value="{{ draft.spec.titles | join(', ') }}">
+  <p class="hint">Comma separated. We already search Developer, Engineer, Programmer and SDE
+     versions of whatever you put here.</p>
+
+  <label for="must_have">Must have</label>
+  <input type="text" id="must_have" name="must_have"
+         value="{{ draft.spec.must_have_skills | join(', ') }}">
+  <p class="hint">Comma separated. More than six here usually returns nobody.</p>
+
+  <label for="nice_to_have">Nice to have</label>
+  <input type="text" id="nice_to_have" name="nice_to_have"
+         value="{{ draft.spec.nice_to_have_skills | join(', ') }}">
+
+  <label>Experience</label>
+  <div style="display:flex; gap:10px; align-items:center">
+    <input type="number" name="min_years" min="0" max="40" style="width:90px"
+           value="{{ draft.spec.seniority.min_years if draft.spec.seniority.min_years is not none else '' }}">
+    <span class="muted">to</span>
+    <input type="number" name="max_years" min="0" max="40" style="width:90px"
+           value="{{ draft.spec.seniority.max_years if draft.spec.seniority.max_years is not none else '' }}">
+    <span class="muted">years</span>
+  </div>
+
+  {# Checkboxes, not a multi-select. A <select multiple> needs Ctrl+click to pick more
+     than one and gives no sign that it does, which is how a recruiter submits an empty
+     location three times and reads "it is not working". Same field name, so nothing on
+     the server side changes. #}
+  <label>Locations{% if needs_location %} <span class="label-bad">— pick at least one</span>{% endif %}</label>
+  <div class="checkgrid{% if needs_location %} needs-fixing{% endif %}">
+    {% for code, name in all_regions %}
+      <label style="font-weight:400">
+        <input type="checkbox" name="locations" value="{{ code }}"
+               {% if code in draft.spec.locations %}checked{% endif %}> {{ name }}
+      </label>
+    {% endfor %}
+  </div>
+  <p class="hint">Tick every city you would consider. Or tick nothing and choose
+     <em>Fully remote</em> below.</p>
+
+  <label>Working arrangement</label>
+  {% for value, text in [('onsite','In office'), ('hybrid','Hybrid'),
+                         ('remote','Fully remote'), ('remote_relocate','Remote, will relocate')] %}
+    <label style="font-weight:400; display:inline-flex; gap:6px; margin-right:16px">
+      <input type="radio" name="remote" value="{{ value }}"
+             {% if draft.spec.remote == value %}checked{% endif %}> {{ text }}
+    </label>
+  {% endfor %}
+
+  <label for="pages">How wide should we search?</label>
+  <select id="pages" name="pages">
+    <option value="1">Quick look</option>
+    <option value="3" selected>Normal</option>
+    <option value="5">As wide as possible</option>
+  </select>
+  <p class="hint">Wider takes longer and uses more of the monthly search allowance.</p>
+
+  <div class="note info" style="margin-top:20px">
+    We search public professional listings and public work — code, projects, portfolios.
+    We do not search paid resume databases, and we never collect anyone's photo, age or
+    background details.
+  </div>
+
+  <p><button class="btn" type="submit">Find candidates</button></p>
+</form>
+
+{% if draft.raw_model_output and draft.blocking %}
+  <details style="margin-top:20px">
+    <summary class="muted">What we read from the description</summary>
+    <pre style="white-space:pre-wrap; font-size:12px">{{ draft.raw_model_output }}</pre>
+  </details>
+{% endif %}

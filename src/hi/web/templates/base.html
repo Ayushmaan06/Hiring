@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hiring{% endblock %}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c2230; --muted: #6b7280; --line: #e5e7eb; --bg: #f6f7fb; --card: #fff;
+      --proven: #0f7b4a; --proven-bg: #e6f6ee;
+      --said: #4b5563; --said-bg: #f1f2f4;
+      --warn: #8a5a00; --warn-bg: #fff7e6;
+      --bad: #b42323; --bad-bg: #fdecec;
+      --accent: #3b5bdb; --accent-dark: #2f4ac0; --accent-bg: #eef2ff;
+      --radius: 10px; --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 15px/1.55 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    header { background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 32px;
+             display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 5;
+             box-shadow: var(--shadow); }
+    header a.brand { font-weight: 700; font-size: 17px; text-decoration: none; color: var(--ink);
+                     display: inline-flex; align-items: center; gap: 10px; }
+    header a.brand::before { content: "H"; display: inline-grid; place-items: center; width: 30px;
+                             height: 30px; border-radius: 8px; color: #fff; font-size: 15px;
+                             background: linear-gradient(135deg, var(--accent), #7048e8); }
+    main { padding: 32px; max-width: 1140px; margin: 0 auto; }
+    h1 { font-size: 26px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 6px; }
+    h2 { font-size: 18px; font-weight: 650; margin: 32px 0 10px; }
+    p.sub { color: var(--muted); margin: 0 0 22px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; background: var(--card);
+            border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+            overflow: hidden; }
+    th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line);
+             vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafbff; }
+    th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+         color: var(--muted); background: #f9fafb; }
+    td a { font-weight: 600; }
+    .btn {
+      display: inline-block; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--accent);
+      background: var(--accent); color: #fff; text-decoration: none; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.2;
+      transition: background .15s, box-shadow .15s, transform .05s;
+    }
+    .btn:hover { background: var(--accent-dark); text-decoration: none;
+                 box-shadow: 0 2px 8px rgba(59,91,219,.25); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: var(--card); color: var(--accent); border-color: #c7d2fe; }
+    .btn.secondary:hover { background: var(--accent-bg); box-shadow: none; }
+    .btn.small { padding: 6px 12px; font-size: 13px; }
+    textarea, input[type=text], input[type=number], input[type=password], select {
+      width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+      font: inherit; background: var(--card); color: var(--ink);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    textarea:focus, input:focus, select:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,91,219,.15);
+    }
+    input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; }
+    label { display: block; font-weight: 600; font-size: 13px; margin: 18px 0 6px; }
+    .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+    /* Proof of life while a search runs. The numbers next to it are the real signal;
+       this just makes "still working" visible without reading them. */
+    .working { font-weight: 600; color: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.45; } }
+    @media (prefers-reduced-motion: reduce) { .working { animation: none; } }
+    .note { padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px;
+            background: var(--accent-bg); color: #2c3e8f; border-left: 4px solid var(--accent); }
+    .note.warn { background: var(--warn-bg); color: var(--warn); border-left-color: #e5a100; }
+    .note.bad { background: var(--bad-bg); color: var(--bad); border-left-color: var(--bad); }
+    .note.info { background: var(--accent-bg); color: #2c3e8f; }
+    /* Two badges only, and they must be unmistakable at a glance. */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px;
+             font-weight: 600; white-space: nowrap; }
+    .badge-proven { background: var(--proven-bg); color: var(--proven); }
+    .badge-said   { background: var(--said-bg);   color: var(--said); }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px;
+            font-weight: 600; background: var(--said-bg); color: var(--said); text-transform: capitalize; }
+    .bar { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 6px; }
+    .bar i { width: 16px; height: 8px; border-radius: 4px; background: var(--line); display: block; }
+    .bar i.on { background: var(--proven); }
+    .label-strong { color: var(--proven); font-weight: 600; }
+    .label-weak { color: var(--muted); }
+    .row-acted { opacity: .5; }
+    .panel { position: fixed; top: 0; right: 0; width: min(580px, 100%); height: 100%; z-index: 10;
+             background: var(--card); border-left: 1px solid var(--line); overflow-y: auto;
+             padding: 24px 28px; box-shadow: -12px 0 40px rgba(16,24,40,.15); }
+    .claim { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
+    .claim blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid #c7d2fe;
+                        color: #374151; font-size: 14px; }
+    .compbar { display: grid; grid-template-columns: 150px 1fr 46px; gap: 10px; align-items: center;
+               margin: 6px 0; font-size: 13px; }
+    .compbar .track { background: var(--line); border-radius: 999px; height: 8px; overflow: hidden; }
+    .compbar .fill { display: block; background: linear-gradient(90deg, var(--accent), #7048e8);
+                     height: 8px; border-radius: 999px; }
+    .muted { color: var(--muted); }
+    .light { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .light.green { background: var(--proven); }
+    .light.amber { background: #d99000; }
+    .light.red { background: var(--bad); }
+    .checkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                 gap: 8px 14px; padding: 14px 16px; border: 1px solid var(--line);
+                 border-radius: var(--radius); background: var(--card); }
+    .checkgrid.needs-fixing { border-color: var(--bad); background: var(--bad-bg); }
+    .checkgrid label { margin: 0; display: flex; gap: 8px; align-items: center; font-size: 14px; }
+    .label-bad { color: var(--bad); font-weight: 600; }
+    ul.chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    pre.cmd { background: #f6f7f9; border: 1px solid var(--line); border-radius: 6px;
+              padding: 10px 12px; overflow-x: auto; font-size: 13px; margin: 4px 0 0;
+              font-family: ui-monospace, Consolas, monospace; white-space: pre-wrap;
+              word-break: break-all; user-select: all; }
+    ul.chips li { background: var(--accent-bg); color: #2c3e8f; border-radius: 999px;
+                  padding: 3px 10px; font-size: 12.5px; font-weight: 500; }
+    details summary { cursor: pointer; }
+    @media (max-width: 700px) {
+      header { padding: 12px 16px; } main { padding: 20px 16px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">Hiring</a>
+    <span class="muted">{% block header_note %}{% endblock %}</span>
+    {% if request.state.actor is defined and request.state.actor %}
+      <form method="post" action="/logout" style="margin-left:auto; display:flex; gap:10px; align-items:center">
+        <span class="muted">{{ request.state.actor }}</span>
+        <button class="btn small secondary" type="submit">Sign out</button>
+      </form>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
