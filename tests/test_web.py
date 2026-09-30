@@ -749,8 +749,10 @@ def test_the_recheck_still_runs_at_maximum_depth(client, db_conn, role_id):
 
 def test_an_unknown_outcome_in_the_url_is_ignored(client, db_conn, role_id):
     """`more` comes back off a URL a recruiter can edit or bookmark."""
-    body = client.get(f"/roles/{role_id}?more=<script>&rechecked=9").text
-    assert "<script>" not in body
+    # A marker, not "<script>": the page carries its own script (the filter bar), and
+    # the point is that nothing off the URL is echoed back, escaped or not.
+    body = client.get(f"/roles/{role_id}?more=<script>zq9marker</script>&rechecked=9").text
+    assert "zq9marker" not in body
 
 
 def test_finding_more_on_an_unknown_role_is_404(client, db_conn):

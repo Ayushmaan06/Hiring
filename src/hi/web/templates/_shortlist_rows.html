@@ -77,7 +77,7 @@
   </thead>
   <tbody>
   {% for r in kept %}
-    <tr class="{{ 'row-acted' if r.last_action }}">
+    <tr class="{{ 'row-acted' if r.last_action }}" data-loc="{{ r.primary_location_text or '' }}">
       <td>
         {{ person(r) }}
       </td>
@@ -127,7 +127,7 @@
     <thead><tr><th>Name</th><th>Where we found them</th></tr></thead>
     <tbody>
       {% for r in not_looked_at %}
-      <tr>
+      <tr data-loc="{{ r.primary_location_text or '' }}">
         <td>{{ person(r) }}</td>
         <td class="muted">{{ r.primary_location_text or "Location not recorded" }}</td>
       </tr>
@@ -148,7 +148,7 @@
     <thead><tr><th>Name</th><th>Why we ruled them out</th></tr></thead>
     <tbody>
       {% for r in ruled_out %}
-      <tr>
+      <tr data-loc="{{ r.primary_location_text or '' }}">
         <td>
           {{ person(r) }}
         </td>
@@ -170,7 +170,7 @@
     The search found them, but what it could see was enough to rule them out before
     reading anything. If a reason below looks wrong, the search is too narrow &mdash;
     widen the job titles or add a location. You can also
-    <a href="#reading">read them anyway</a> and let the ranking decide.
+    <a href="#reading" onclick="document.getElementById('advanced').open = true">read them anyway</a> and let the ranking decide.
   </p>
   <details>
     <summary class="muted">Show them and the reason</summary>
@@ -178,7 +178,7 @@
       <thead><tr><th>Name</th><th>Where</th><th>Why we did not open it</th></tr></thead>
       <tbody>
         {% for r in not_opened %}
-        <tr>
+        <tr data-loc="{{ r.snippet_location or '' }}">
           <td><a href="{{ r.source_url }}" target="_blank" rel="noopener">{{ r.snippet_name or "Name not recorded" }}</a></td>
           <td class="muted">{{ r.snippet_location or "&mdash;" }}</td>
           <td class="muted">{{ plain_reason(r.gate_reason or "") }}</td>

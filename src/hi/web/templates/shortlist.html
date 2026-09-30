@@ -15,9 +15,49 @@
 {# The poll lives INSIDE the partial, not on this wrapper: a trigger out here is
    decided once at page load, so a search that starts a second later never gets
    polled, and one that finishes polls forever. Each response re-arms or drops it. #}
+{# ponytail: client-side filter over the rows already on the page; move it server-side
+   if a role ever lists more people than one page can hold. #}
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin:0 0 16px">
+  <input type="text" id="f-search" placeholder="Search name, skill or location"
+         aria-label="Search people" style="flex:2 1 240px" oninput="filterRows()">
+  <select id="f-loc" aria-label="Filter by location" style="flex:1 1 180px" onchange="filterRows()">
+    <option value="">All locations</option>
+  </select>
+</div>
+
 <div id="rows">
   {% include "_shortlist_rows.html" %}
 </div>
+
+<script>
+  function filterRows() {
+    const q = document.getElementById('f-search').value.trim().toLowerCase();
+    const loc = document.getElementById('f-loc').value;
+    document.querySelectorAll('#rows tbody tr').forEach(tr => {
+      tr.hidden = !((!q || tr.textContent.toLowerCase().includes(q)) && (!loc || tr.dataset.loc === loc));
+    });
+  }
+  // The rows re-render every 3s while a search runs, so the options and the filter
+  // are rebuilt after every swap rather than once at load.
+  function fillLocations() {
+    const sel = document.getElementById('f-loc'), keep = sel.value;
+    const locs = [...new Set([...document.querySelectorAll('#rows tr[data-loc]')]
+      .map(tr => tr.dataset.loc).filter(Boolean))].sort();
+    sel.replaceChildren(new Option('All locations', ''), ...locs.map(l => new Option(l, l)));
+    sel.value = locs.includes(keep) ? keep : '';
+  }
+  fillLocations();
+  document.body.addEventListener('htmx:afterSwap', e => {
+    if (e.target.id === 'rows') { fillLocations(); filterRows(); }
+  });
+</script>
+
+{# Everything past the list is for whoever runs the searches, not for reading results,
+   so it starts folded. It opens on its own when it has something to say: a button in
+   here was just pressed, or a read is running. #}
+<details id="advanced" style="margin-top:32px" {% if more or reading or reading_now %}open{% endif %}>
+<summary><h2 style="display:inline">Advanced</h2>
+  <span class="muted">&mdash; find more people, read LinkedIn profiles</span></summary>
 
 {% if search_depth is defined %}
 <h2>Not enough people?</h2>
@@ -76,6 +116,7 @@
 {% endif %}
 
 {% if collect_todo is defined %}{% include "_reading.html" %}{% endif %}
+</details>
 
 <div id="panel"></div>
 {% endblock %}
