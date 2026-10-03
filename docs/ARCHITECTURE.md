@@ -515,7 +515,7 @@ candidate_ref(id bigserial primary key,
     source_url text not null,
     gate_state text not null default 'pending',   -- pending | passed | failed
     gate_reason text,                         -- 'title: no match for senior|lead' etc. NOT NULL when failed
-    candidate_id uuid references candidate on delete cascade,  -- set once enriched
+    candidate_id uuid references candidate on delete cascade,  -- set once the slug is known, on every role (016)
     discovered_at timestamptz not null default now(),
     unique (role_id, ref_kind, ref_value))
 ```
@@ -769,7 +769,7 @@ restricted because nothing is authenticated.**
 
 | Limit | Default |
 |---|---|
-| profiles per day per account | 30 (raised from 15 on 2026-08-27, see below) |
+| profiles per rolling 12h per account | 30 (raised from 15/day on 2026-08-27; window cut 24h → 12h on 2026-10-03, see below) |
 | concurrency | 1 |
 | delay between profiles | at least 20s + jitter |
 | headless | never |
@@ -784,6 +784,12 @@ views are separately limited, and the non-recruiter commercial-use limit is mont
 timing regularity is, which is what the ≥20s + jitter and concurrency 1 address, and those are
 unchanged. It remains a hard ceiling in code: a run stops at it, and it is not a target to reach.
 Lower it again the moment a challenge appears.
+
+**Window cut 24h → 12h on 2026-10-03**, at the tool owner's request, on the owner's risk. Still 30
+per window, so the ceiling is now up to 60 reads/day (~1,800/month), roughly double the exposure
+to the monthly commercial-use limit. Pacing, concurrency and the kill switch are unchanged.
+`MAX_PROFILES_PER_WINDOW` and `WINDOW_HOURS` in `linkedin_profile.py`. Revert the window first if a
+challenge appears.
 
 **Browser separation is fine; identity separation is not.** Running automation in a second browser
 (Edge) while personal browsing stays in the primary (Brave) is good hygiene and is encouraged — it

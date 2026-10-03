@@ -474,7 +474,7 @@ def test_role_page_prints_the_command_to_read_profiles(client, db_conn, role_id)
     assert r.status_code == 200
     assert f"--role {str(role_id)[:8]}" in r.text        # this role, not another one
     assert "unread-1" in r.text
-    assert f"of {lp.MAX_PROFILES_PER_DAY}</strong> reads left" in r.text
+    assert f"of {lp.MAX_PROFILES_PER_WINDOW}</strong> reads left" in r.text
 
 
 def test_queue_order_matches_what_the_run_would_read(client, db_conn, role_id):
@@ -885,10 +885,10 @@ def test_reading_everyone_covers_both_sides_of_the_gate(
 def test_reading_everyone_never_exceeds_the_days_quota(
     client, db_conn, unread, ruled_out, can_read, monkeypatch
 ):
-    """"All" means all we can pay for. The rolling 24h cap is shared across every role."""
+    """"All" means all we can pay for. The rolling 12h cap is shared across every role."""
     from hi.adapters import linkedin_profile as lp
 
-    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_DAY - 1)
+    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_WINDOW - 1)
     client.post(
         f"/roles/{unread}/enrich", data={"limit": "50", "scope": "all"}, follow_redirects=False
     )
@@ -1023,7 +1023,7 @@ def test_the_kill_switch_refuses_the_button(client, db_conn, unread, can_read):
 def test_the_spent_budget_refuses_the_button(client, db_conn, unread, can_read, monkeypatch):
     from hi.adapters import linkedin_profile as lp
 
-    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_DAY)
+    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_WINDOW)
     r = client.post(f"/roles/{unread}/enrich", data={"limit": "1"}, follow_redirects=False)
     assert r.headers["location"].endswith("reading=spent")
     assert enrich_jobs(db_conn) == []

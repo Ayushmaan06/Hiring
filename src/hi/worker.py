@@ -335,6 +335,15 @@ async def handle_enrich(job: Job) -> None:
         # changes every ranking for the role.
         enqueue("collect", {"role_id": str(role_id)})
         enqueue("score", {"role_id": str(role_id)})
+        # The same people may sit on other roles; their rankings changed too.
+        with pool.connection() as conn:
+            others = conn.execute(
+                "select distinct role_id from candidate_ref "
+                "where candidate_id = any(%s) and role_id <> %s",
+                ([cid for cid, _ in targets if cid], role_id),
+            ).fetchall()
+        for (other,) in others:
+            enqueue("score", {"role_id": str(other)})
 
 
 HANDLERS = {

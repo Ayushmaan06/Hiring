@@ -399,7 +399,7 @@
     <p><strong>The tool reads LinkedIn profiles through your own signed-in browser window.</strong>
     Not a fake account, not a stored password — a real Edge window you open and sign into yourself.
     So that window has to be open on the machine running the tool, and <em>your</em> account is the one
-    that carries the risk. It is capped at 30 profiles per 24 hours and paced at about 25 seconds each
+    that carries the risk. It is capped at 30 profiles per 12 hours and paced at about 25 seconds each
     for exactly that reason.</p>
   </li>
   <li>
@@ -465,7 +465,7 @@
       <h3>Reading profiles<span class="mins">2 min</span></h3>
       <p>Scroll to <strong>Read LinkedIn profiles</strong>. Point at the budget line.</p>
       <div class="say">
-        <p>“This is the rationed part. Thirty profile reads per 24 hours, shared across every role —
+        <p>“This is the rationed part. Thirty profile reads per 12 hours, shared across every role —
         ten spent here are ten unavailable tomorrow morning. It is deliberately slow, about
         25&nbsp;seconds a person, because that is what keeps my LinkedIn account healthy.”</p>
       </div>
@@ -666,7 +666,7 @@ python -m hi.db migrate</pre>
 
   <h3>The rhythm the budget forces</h3>
   <p>
-    Thirty reads per rolling 24 hours. A role with forty people found cannot be fully read in one
+    Thirty reads per rolling 12 hours. A role with forty people found cannot be fully read in one
     day, and that is the intended shape: read the top ten, look at the ranking, decide whether the
     role's must-have skills were right, and only then spend more. If the top ten are all wrong,
     editing the role beats reading thirty more people.

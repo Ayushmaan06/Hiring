@@ -116,6 +116,16 @@ def resolve(
                 (candidate_id, kind, value),
             )
 
+        # A ref is per role, the person is not. Without this, someone read for one role
+        # stayed "next run" on every other role that found them, and a second read would
+        # spend the budget to learn nothing.
+        if slug := keys.get("linkedin_slug"):
+            conn.execute(
+                "update candidate_ref set candidate_id = %s where candidate_id is null "
+                "and ref_kind = 'linkedin_url' and ref_value = %s",
+                (candidate_id, f"linkedin.com/in/{slug.lower()}"),
+            )
+
     return ResolveResult(candidate_id=candidate_id, created=created, matched=matched)
 
 

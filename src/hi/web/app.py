@@ -466,7 +466,7 @@ def _collect_context(role_id: uuid.UUID) -> dict:
         "collect_todo": todo,
         "collect_done": [p for p in waiting if p["enriched"]],
         "collect_budget": remaining,
-        "collect_cap": lp.MAX_PROFILES_PER_DAY,
+        "collect_cap": lp.MAX_PROFILES_PER_WINDOW,
         # The default asks for what is both wanted and affordable — never a number the
         # run would silently truncate.
         "collect_default": min(len(todo), remaining),

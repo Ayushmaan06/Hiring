@@ -93,7 +93,7 @@ Two things to know before anything else:
 1. **The tool reads LinkedIn profiles through your own signed-in browser window.** Not a fake
    account, not a stored password — a real Edge window you open and sign into yourself. So that
    window has to be open on the machine running the tool, and **your** account is the one that
-   carries the risk. It is capped at 30 profiles per rolling 24 hours and paced at ~25 seconds each
+   carries the risk. It is capped at 30 profiles per rolling 12 hours and paced at ~25 seconds each
    for exactly that reason.
 2. **It finds fewer people than a LinkedIn search, on purpose.** Twenty people worth contacting
    beats five thousand rows. If a search returns twelve people, that is not a fault.
@@ -198,7 +198,7 @@ not.
 5. Work in the browser: **New role** → paste the job description → confirm → wait →
    **Read them now** → shortlist.
 
-**The rhythm the budget forces.** Thirty reads per rolling 24 hours, shared across every role. A
+**The rhythm the budget forces.** Thirty reads per rolling 12 hours, shared across every role. A
 role with forty people found cannot be fully read in one day, and that is the intended shape: read
 the top ten, look at the ranking, decide whether the must-have skills were right, and only then
 spend more. If the top ten are all wrong, editing the role beats reading thirty more people.
@@ -227,7 +227,7 @@ reads are left today. If it says 0, the live read below will refuse.
 | **A** | Nothing — no screen | "A job description goes in, a ranked shortlist comes out, and every line about a person has a link to where we read it. It does not guess. If it cannot show you the source, it does not make the claim." |
 | **B** | **New role** → paste → **Read it**. Point at the filled-in form | "It read the description and filled this in. It is a draft — I get the final say, and nothing searches until I confirm. Locations are checkboxes: it will not go looking in a city I did not tick." Then **Find candidates** |
 | **C** | The page fills in on its own. Scroll to "N we did not open" and read one reason aloud | "It is searching LinkedIn the way you or I would from Google — public results only, no account at this step. Each result gets a first pass: right city, right kind of role. The ones that fail are listed too, with the reason, so you can see when I have been too strict." |
-| **D** | **Read LinkedIn profiles** → set the count to **2** → **Read them now** | "This is the rationed part. Thirty reads per 24 hours, shared across every role. It is deliberately slow, about 25 seconds a person, because that is what keeps my account healthy. It is reading through that Edge window — one profile at a time, and it tells me who it is on. If LinkedIn shows it a wall it stops, switches itself off, and says so here. It will never quietly return nothing and look successful." |
+| **D** | **Read LinkedIn profiles** → set the count to **2** → **Read them now** | "This is the rationed part. Thirty reads per 12 hours, shared across every role. It is deliberately slow, about 25 seconds a person, because that is what keeps my account healthy. It is reading through that Edge window — one profile at a time, and it tells me who it is on. If LinkedIn shows it a wall it stops, switches itself off, and says so here. It will never quietly return nothing and look successful." |
 | **E** | Open the prepared role. Point at the three groups, then open a person's card | "Three groups: checked and matched, checked and ruled out, and *nobody has read them yet*. That third one used to say 'no sign of Python' about people we never opened. Every line on this card has a source link and the exact words we read — and 'Says so' is what someone wrote about themselves, 'Proven' is what we verified in their public work. Those two never get added together. The ranking itself is arithmetic: five things, fixed weights, same answer every time. The sentence explaining it is written by an AI; the AI never touches the number." |
 | **F** | Go back to the live role — the two profiles have folded into the ranking | "It will not collect age, gender, caste, religion, marital status or photographs. Not 'collects but ignores' — it does not read them at all. And it never stores anyone's email in plain text. We identify people; you contact them the normal way." |
 

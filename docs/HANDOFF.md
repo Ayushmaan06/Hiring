@@ -155,7 +155,7 @@ python -m hi.adapters.linkedin_profile run --role d956b79f --only some-slug,othe
 |---|---|
 | **Two `pytest` runs at once wipe each other** | `conftest` drops and recreates `hi_test`, so a background suite plus a foreground one produced 32 spurious `relation "skill" does not exist` errors that looked like real failures. Never start a second run while one is going. |
 | **Heredocs mangle `\b` into a literal backspace** | Documented twice before and hit again today: `re.compile(r"\bindia\b")` was written to disk as `\x08india\x08`, which silently matches nothing. **Use the editor tools for anything containing a backslash.** |
-| **`spent_today()` is a rolling 24h window, not a calendar day** | Check with `python -m hi.adapters.linkedin_profile` before planning a run. |
+| **`spent_today()` is a rolling 12h window, not a calendar day** | Check with `python -m hi.adapters.linkedin_profile` before planning a run. |
 | **A whole profile capture parses to zero roles** | `_significant_lines` stops at the first "people also viewed" marker, which those pages render *before* the experience section. Slice from the `Experience` heading and refuse to act on a page that parses to nothing. |
 | **A gate fix does not fix existing rows** | The verdict is stored on `candidate_ref` at discovery time. `discovery.regate` re-runs it from `snippet_raw` without spending SERP searches — via `scripts/regate_refs.py`, or the "Find more people" button, which does it on every press. |
 | `pytest` wiped the dev database | `conftest` now uses `hi_test`, with an assertion refusing to wipe anything else. |

@@ -15,7 +15,7 @@
   </div>
 {% elif reading == 'spent' %}
   <div class="note warn">
-    All {{ collect_cap }} profile reads for the last 24 hours are used up.
+    All {{ collect_cap }} profile reads for the last 12 hours are used up.
     {% if collect_frees_at %}The next one frees up around {{ collect_frees_at }}.{% endif %}
   </div>
 {% elif reading == 'no-browser' %}
@@ -48,7 +48,7 @@
   </div>
 {% elif collect_budget == 0 %}
   <div class="note warn">
-    All {{ collect_cap }} profile reads for the last 24 hours are used up. More free up
+    All {{ collect_cap }} profile reads for the last 12 hours are used up. More free up
     gradually as the oldest reads age out &mdash; this is a rolling window, not a daily reset.
     {% if collect_frees_at %}The next one is back around {{ collect_frees_at }}.{% endif %}
   </div>

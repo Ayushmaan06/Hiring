@@ -14,7 +14,7 @@ ban looks like in practice.
 **The limits are in this file, not in config**, because ARCHITECTURE.md §7.4 requires
 that they cannot be tuned away by editing a row:
 
-    at most 30 profiles per day · one at a time · at least 20s + jitter between them
+    at most 30 profiles per rolling 12h · one at a time · at least 20s + jitter between them
     · never headless · abort and trip the kill switch on the first wall
 
 **On seeing a wall it stops and goes red.** A run that quietly records zero experiences
@@ -60,8 +60,10 @@ EXTRACTOR_VERSION = "linkedin_mode_c@2"
 # --- Mode C limits. In code on purpose (§7.4). Do not move these to settings. ---
 CDP_URL = "http://127.0.0.1:9222"
 # Raised 15 -> 30 on 2026-08-27 at the tool owner's request (ARCHITECTURE.md §7.4).
+# Window cut 24h -> 12h on 2026-10-03 at the tool owner's request (ARCHITECTURE.md §7.4).
 # Still a hard ceiling in code: a run stops at it, it is not a target to reach.
-MAX_PROFILES_PER_DAY = 30
+MAX_PROFILES_PER_WINDOW = 30
+WINDOW_HOURS = 12
 MIN_DELAY_SECONDS = 20
 JITTER_SECONDS = 10
 # Between the sub-pages of ONE profile. Human click speed, not a burst.
@@ -880,12 +882,12 @@ class EnrichResult:
 
 
 def spent_today() -> int:
-    """Profiles fetched in the last 24h. The per-account cap, counted from the audit trail."""
+    """Profiles fetched in the rolling window. The per-account cap, counted from the audit trail."""
     with pool.connection() as conn:
         return conn.execute(
             'select count(*) from "fetch" where adapter = %s '
-            "and fetched_at > now() - interval '24 hours'",
-            (ADAPTER,),
+            "and fetched_at > now() - make_interval(hours => %s)",
+            (ADAPTER, WINDOW_HOURS),
         ).fetchone()[0]
 
 
@@ -922,9 +924,9 @@ async def _enrich(
     measurement, which needs the yield number without storing anyone.
     """
     result = EnrichResult()
-    budget = MAX_PROFILES_PER_DAY - spent_today()
+    budget = MAX_PROFILES_PER_WINDOW - spent_today()
     if budget <= 0:
-        result.stopped_reason = f"daily cap reached ({MAX_PROFILES_PER_DAY}/day, in code)"
+        result.stopped_reason = f"cap reached ({MAX_PROFILES_PER_WINDOW} per {WINDOW_HOURS}h, in code)"
         return result
     todo = targets[: min(budget, limit or budget)]
     if len(todo) < len(targets):
@@ -1057,8 +1059,8 @@ def _by_promise(role_id: uuid.UUID, gate_state: str | None = "passed") -> list[d
 
 
 def budget_remaining() -> int:
-    """Profile reads left in the rolling 24h window. Never negative."""
-    return max(0, MAX_PROFILES_PER_DAY - spent_today())
+    """Profile reads left in the rolling window. Never negative."""
+    return max(0, MAX_PROFILES_PER_WINDOW - spent_today())
 
 
 def budget_frees_at() -> datetime | None:
@@ -1069,9 +1071,9 @@ def budget_frees_at() -> datetime | None:
     """
     with pool.connection() as conn:
         return conn.execute(
-            'select min(fetched_at) + interval \'24 hours\' from "fetch" '
-            "where adapter = %s and fetched_at > now() - interval '24 hours'",
-            (ADAPTER,),
+            'select min(fetched_at) + make_interval(hours => %s) from "fetch" '
+            "where adapter = %s and fetched_at > now() - make_interval(hours => %s)",
+            (WINDOW_HOURS, ADAPTER, WINDOW_HOURS),
         ).fetchone()[0]
 
 
@@ -1197,13 +1199,7 @@ def targets_for_role(
             )
             if resolved.candidate_id is None:
                 continue  # ambiguous: a human decides, we do not guess
-            candidate_id = resolved.candidate_id
-            with pool.connection() as conn:
-                conn.execute(
-                    "update candidate_ref set candidate_id = %s where role_id = %s "
-                    "and ref_value = %s",
-                    (candidate_id, role_id, url),
-                )
+            candidate_id = resolved.candidate_id  # resolve() linked this ref, on every role
         if skip_enriched and candidate_id in seen:
             continue
         if only_missing_keys and github.resolve(identity.strong_keys_for(candidate_id)):
@@ -1302,7 +1298,7 @@ def main() -> None:
             "This runs on YOUR real LinkedIn account and that account may be restricted. "
             "Never a second, made-up or shared account — it is banned, and it returns less."
         )
-        print(f"Limits in code: {MAX_PROFILES_PER_DAY}/day, {MIN_DELAY_SECONDS}s+ apart, serial.")
+        print(f"Limits in code: {MAX_PROFILES_PER_WINDOW} per {WINDOW_HOURS}h, {MIN_DELAY_SECONDS}s+ apart, serial.")
     elif command == "disable":
         reason = args[args.index("--reason") + 1] if "--reason" in args else "disabled by operator"
         _set_enabled(False, by=None, reason=reason)
@@ -1371,7 +1367,7 @@ def main() -> None:
         for domain, enabled, reviewed_at, disabled_reason in rows:
             state = "ENABLED" if enabled else "disabled"
             print(f"{domain:20} {state:9} reviewed={reviewed_at} {disabled_reason or ''}")
-        print(f"spent today: {spent_today()} of {MAX_PROFILES_PER_DAY}")
+        print(f"spent in last {WINDOW_HOURS}h: {spent_today()} of {MAX_PROFILES_PER_WINDOW}")
 
 
 if __name__ == "__main__":

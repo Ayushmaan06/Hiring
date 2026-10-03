@@ -48,7 +48,8 @@ def persist_refs(role_id: uuid.UUID, refs: list[CandidateRef], spec: RoleSpec) -
     """Gate each ref and upsert it. Pure DB + pure gate: no network, so it is testable.
 
     Re-running re-evaluates the gate (the spec may have been edited) but never
-    clobbers `candidate_id`, which is set later by enrichment.
+    clobbers `candidate_id`. It is filled here only when the person is already known
+    by their LinkedIn slug — read for another role — and otherwise later, by enrichment.
     """
     counts = {"passed": 0, "failed": 0}
     with pool.connection() as conn:
@@ -56,22 +57,26 @@ def persist_refs(role_id: uuid.UUID, refs: list[CandidateRef], spec: RoleSpec) -
             verdict = snippet_gate(ref, spec)
             state = "passed" if verdict.passed else "failed"
             counts[state] += 1
+            slug = ref.ref_value.rsplit("/", 1)[-1] if ref.ref_kind == "linkedin_url" else None
             conn.execute(
                 "insert into candidate_ref "
                 "(role_id, adapter, ref_kind, ref_value, snippet_name, snippet_headline, "
-                " snippet_location, snippet_raw, source_url, gate_state, gate_reason) "
-                "values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+                " snippet_location, snippet_raw, source_url, gate_state, gate_reason, "
+                " candidate_id) "
+                "values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+                " (select candidate_id from identity where kind = 'linkedin_slug' and value = %s)) "
                 "on conflict (role_id, ref_kind, ref_value) do update set "
                 "  snippet_name = excluded.snippet_name,"
                 "  snippet_headline = excluded.snippet_headline,"
                 "  snippet_location = excluded.snippet_location,"
                 "  snippet_raw = excluded.snippet_raw,"
                 "  gate_state = excluded.gate_state,"
-                "  gate_reason = excluded.gate_reason",
+                "  gate_reason = excluded.gate_reason,"
+                "  candidate_id = coalesce(candidate_ref.candidate_id, excluded.candidate_id)",
                 (
                     role_id, ref.adapter, ref.ref_kind, ref.ref_value, ref.snippet_name,
                     _display_headline(ref), ref.snippet_location, ref.snippet_raw,
-                    ref.source_url, state, verdict.reason,
+                    ref.source_url, state, verdict.reason, slug,
                 ),
             )
     return counts

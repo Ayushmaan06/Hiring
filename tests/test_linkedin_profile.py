@@ -331,19 +331,20 @@ async def test_mode_b_stays_blocked_by_robots(db_conn):
     assert row[0] is True
 
 
-def test_the_daily_cap_lives_in_code_not_config():
+def test_the_cap_lives_in_code_not_config():
     """ARCHITECTURE.md §7.4 — a limit that can be edited in a row is not a limit."""
     import inspect
 
     from hi.config import Settings
 
-    assert lp.MAX_PROFILES_PER_DAY == 30
+    assert lp.MAX_PROFILES_PER_WINDOW == 30
+    assert lp.WINDOW_HOURS == 12
     assert lp.MIN_DELAY_SECONDS >= 20
     assert lp.CONCURRENCY == 1
     for name in Settings.model_fields:
         assert "linkedin" not in name, f"{name} makes a mode C limit configurable"
     # And the run must actually consult it.
-    assert "MAX_PROFILES_PER_DAY" in inspect.getsource(lp._enrich)
+    assert "MAX_PROFILES_PER_WINDOW" in inspect.getsource(lp._enrich)
 
 
 def test_no_credential_path_exists_in_this_adapter():
@@ -366,15 +367,15 @@ def test_it_attaches_and_never_launches_a_browser():
 
 async def test_cap_is_enforced_before_any_browser_is_opened(db_conn, monkeypatch):
     """At the cap, `enrich` returns without so much as looking for a browser."""
-    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_DAY)
+    monkeypatch.setattr(lp, "spent_today", lambda: lp.MAX_PROFILES_PER_WINDOW)
 
     def explode():
-        raise AssertionError("attached to a browser despite being at the daily cap")
+        raise AssertionError("attached to a browser despite being at the cap")
 
     monkeypatch.setattr(lp, "attached_page", explode)
     result = await lp.enrich([(None, PROFILE_URL)])
     assert result.attempted == 0
-    assert "daily cap" in result.stopped_reason
+    assert "cap reached" in result.stopped_reason
 
 
 # --- CLI ergonomics -----------------------------------------------------------

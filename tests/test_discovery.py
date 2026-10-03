@@ -201,3 +201,20 @@ def test_manual_filing_survives_a_regate_and_known_people_feed_new_roles(db_conn
     assert sorted(r.ref_value for r in found) == ["linkedin.com/in/dev", "linkedin.com/in/serp"]
     assert all(r.adapter == "local_db" for r in found)
     assert discovery.known_candidates(SPEC, old) == []  # already on that role
+
+
+def test_a_person_read_for_one_role_is_linked_on_every_role(db_conn):
+    """A ref is per role, the person is not. Read once, linked everywhere — before and after."""
+    from hi import identity
+
+    before = discovery.create_role("Ops Manager", SPEC)
+    after = discovery.create_role("BD Manager", SPEC)
+    discovery.persist_refs(before, [_ref("jayasimhabr", "Business Development")], SPEC)
+
+    # Enrichment resolves the slug on whichever role it ran for...
+    cid = identity.resolve({"linkedin_slug": "jayasimhabr"}).candidate_id
+    assert [r["candidate_id"] for r in discovery.saved_refs(before)] == [cid]
+
+    # ...and a role that finds them later gets them already linked.
+    discovery.persist_refs(after, [_ref("jayasimhabr", "Business Development")], SPEC)
+    assert [r["candidate_id"] for r in discovery.saved_refs(after)] == [cid]
