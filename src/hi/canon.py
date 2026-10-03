@@ -76,6 +76,11 @@ _KINDS = _build_kinds()
 # must-have is a role where public artefacts are a reasonable expectation; a role
 # naming only tools, practices, domains or qualifications is not.
 CODE_KINDS = frozenset({"language", "framework"})
+
+# Languages that analysts, marketers and business people list as everyday tools. On
+# their own they are no sign of public code: "Business & Strategy Associate" asked for
+# SQL beside Excel and PowerPoint, and was scored and searched as an engineering role.
+ANALYST_LANGUAGES = frozenset({"SQL", "R", "MATLAB", "HTML", "CSS"})
 _REGION_CITIES = _load_regions_yaml()
 _REGIONS = _build_region_lookup()
 
@@ -86,19 +91,27 @@ def skill_kind(canonical: str) -> str | None:
     return _KINDS.get(canonical)
 
 
-def expects_artifacts(skills: list[str]) -> bool:
-    """True when any of these skills is a programming language or framework.
+def expects_artifacts(skills: list[str], titles: list[str] = ()) -> bool:
+    """True when the role asks for a programming language or framework.
 
-    This is how a role is classified for weighting (ARCHITECTURE.md §2.3): an
-    engineering role always names a language or a framework among its must-haves, and
-    a business role never does. Derived from the canon rather than asked of an LLM,
-    so it is deterministic and a recruiter can see why by looking at the skill list.
+    This is how a role is classified for weighting (ARCHITECTURE.md §2.3). Derived from
+    the canon rather than asked of an LLM, so it is deterministic and a recruiter can
+    see why by looking at the skill list. Not expecting artefacts is the neutral
+    answer: it scores everyone only on what anyone can have.
+
+    An analyst language (SQL, R...) counts only when a title says engineer or developer
+    — that is how "Data Engineer" asking for SQL alone stays an engineering role.
     """
-    for skill in skills or []:
-        canonical = _SKILLS.get(_normalise(skill))
-        if canonical and _KINDS.get(canonical) in CODE_KINDS:
-            return True
-    return False
+    from hi.gating import _ROLE_WORD_RE
+
+    code = {
+        canonical
+        for skill in skills or []
+        if (canonical := _SKILLS.get(_normalise(skill))) and _KINDS.get(canonical) in CODE_KINDS
+    }
+    if code - ANALYST_LANGUAGES:
+        return True
+    return bool(code) and any(_ROLE_WORD_RE.search(t or "") for t in titles or [])
 
 
 def implied_skills(canonical: str) -> list[str]:

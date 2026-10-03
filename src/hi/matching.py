@@ -43,13 +43,14 @@ def weights_profile_for(spec: RoleSpec) -> str:
     their weight. A role naming only tools, practices, domains or qualifications is not,
     and under the engineering profile 40% of its candidates' score is unreachable.
 
-    A role with **no** must-have skills keeps the engineering profile: there is no
-    positive signal that it is non-technical, and scoring should not change on an
-    absence.
+    The business profile is the neutral one — it scores only what anyone can have — so
+    it is also the answer when a role names no must-haves at all (2026-10-02). It used
+    to be engineering, which put 40% of the score out of reach of everyone on
+    "Senior Business / Operations Manager" and ranked every one of them Weak.
     """
-    if not spec.must_have_skills:
+    if canon.expects_artifacts(spec.must_have_skills, spec.titles):
         return ENGINEERING_PROFILE
-    return ENGINEERING_PROFILE if canon.expects_artifacts(spec.must_have_skills) else BUSINESS_PROFILE
+    return BUSINESS_PROFILE
 
 
 def weights_for_role(spec: RoleSpec) -> Weights:
@@ -146,11 +147,13 @@ def shortlist(role_id: uuid.UUID, *, include_excluded: bool = False) -> list[dic
         cur = conn.execute(
             "select m.id as match_id, m.candidate_id, c.display_name, c.primary_location_text, "
             "       m.score, m.components_json, m.gates_json, m.scorer_version, m.weights_version, "
-            "       (select action from recruiter_action a where a.match_id = m.id "
+            # A decision made on an older score of the same person still stands.
+            "       (select a.action from recruiter_action a join match x on x.id = a.match_id "
+            "        where x.role_id = m.role_id and x.candidate_id = m.candidate_id "
             "        order by a.created_at desc limit 1) as last_action, "
             "       (select value from identity i where i.candidate_id = c.id "
             "        and i.kind = 'linkedin_slug' order by value limit 1) as linkedin_slug "
-            "from match m join candidate c on c.id = m.candidate_id "
+            "from current_match m join candidate c on c.id = m.candidate_id "
             "where m.role_id = %s order by m.score desc, c.display_name",
             (role_id,),
         )
@@ -331,7 +334,7 @@ def roles_overview() -> list[dict]:
             "select r.id, r.title, r.status, r.created_at,"
             "  (select count(*) from candidate_ref cr where cr.role_id = r.id) as found,"
             "  (select count(*) from candidate_ref cr where cr.role_id = r.id and cr.gate_state = 'passed') as kept,"
-            "  (select count(*) from match m where m.role_id = r.id) as ranked,"
+            "  (select count(*) from current_match m where m.role_id = r.id) as ranked,"
             "  (select count(*) from recruiter_action a join match m on m.id = a.match_id"
             "    where m.role_id = r.id and a.action = 'shortlisted') as shortlisted,"
             "  (select max(run_at) from role_query q where q.role_id = r.id) as last_run "
@@ -357,7 +360,7 @@ def role_progress(role_id: uuid.UUID) -> dict:
         # a section reading "nothing to rank" (2026-08-31). Ranking someone nobody has
         # opened is the same false claim the three-bucket split exists to prevent.
         ranked = conn.execute(
-            "select count(*) from match m where m.role_id = %s and exists "
+            "select count(*) from current_match m where m.role_id = %s and exists "
             "(select 1 from evidence e where e.candidate_id = m.candidate_id)",
             (role_id,),
         ).fetchone()[0]

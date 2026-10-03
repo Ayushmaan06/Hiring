@@ -56,12 +56,20 @@ def role_id(db_conn):
     return discovery.create_role("Backend Engineer", SPEC)
 
 
-def add_person(db_conn, role_id, *, name, skills=("Python",), region="IN-KA-BLR", proven=True):
+ABROAD = "Austin, Texas, United States"  # the way to be ruled out: missing skills only lower the score
+
+
+def add_person(
+    db_conn, role_id, *, name, skills=("Python",), region="IN-KA-BLR", proven=True, where=None
+):
+    if where:
+        region = None  # an unmappable foreign location, as LinkedIn gives it
+    where = where or "Bengaluru, Karnataka, India"
     candidate_id = uuid.uuid4()
     db_conn.execute(
         "insert into candidate (id, display_name, primary_location_text, location_region) "
         "values (%s, %s, %s, %s)",
-        (candidate_id, name, "Bengaluru, Karnataka, India", region),
+        (candidate_id, name, where, region),
     )
     db_conn.execute(
         "insert into candidate_ref "
@@ -93,10 +101,10 @@ def add_person(db_conn, role_id, *, name, skills=("Python",), region="IN-KA-BLR"
         EvidenceRow(
             claim_type="location",
             claim_key=region,
-            claim_value="Bengaluru, Karnataka, India",
+            claim_value=where,
             tier="self_reported",
             source_url=f"https://github.com/{name}",
-            snippet="Location on GitHub profile: Bengaluru, Karnataka, India",
+            snippet=f"Location on GitHub profile: {where}",
             extractor="github",
             extractor_version="github_deterministic@1",
         )
@@ -221,7 +229,7 @@ def test_excluded_candidate_is_absent_by_default_and_present_behind_the_toggle(
     client, db_conn, role_id
 ):
     add_person(db_conn, role_id, name="alice", skills=("Python",))
-    add_person(db_conn, role_id, name="carol", skills=("Go",))  # fails the must-have
+    add_person(db_conn, role_id, name="carol", where=ABROAD)  # fails the location gate
     matching.score_role(role_id, now=NOW)
 
     default = client.get(f"/roles/{role_id}").text
@@ -230,14 +238,25 @@ def test_excluded_candidate_is_absent_by_default_and_present_behind_the_toggle(
 
     revealed = client.get(f"/roles/{role_id}?show_ruled_out=true").text
     assert "carol" in revealed
-    assert "Python" in revealed  # the reason names what was missing
+    assert "United States" in revealed  # the reason names where they are
 
 
 def test_ruled_out_rows_always_carry_a_reason(client, db_conn, role_id):
-    add_person(db_conn, role_id, name="carol", skills=("Go",))
+    add_person(db_conn, role_id, name="carol", where=ABROAD)
     matching.score_role(role_id, now=NOW)
     body = client.get(f"/roles/{role_id}?show_ruled_out=true").text
-    assert "No public sign of" in body
+    assert "Located outside" in body
+
+
+def test_everyone_read_is_listed_even_with_none_of_the_must_haves(client, db_conn, role_id):
+    """Read means listed. No matching skill scores them Weak; it does not hide them."""
+    add_person(db_conn, role_id, name="alice", skills=("Python",))
+    add_person(db_conn, role_id, name="gopher", skills=("Go",))
+    matching.score_role(role_id, now=NOW)
+
+    ranked = client.get(f"/roles/{role_id}").text.split("Read LinkedIn profiles")[0]
+    assert "gopher" in ranked
+    assert ranked.index("alice") < ranked.index("gopher")
 
 
 # --- "not looked at yet" is not "ruled out" ----------------------------------
@@ -264,13 +283,25 @@ def add_unread_person(db_conn, role_id, *, name):
     return candidate_id
 
 
+def test_people_read_and_ruled_out_are_not_called_unread(client, db_conn, role_id):
+    """21 read, all ruled out, and the page said "Nobody has been read yet" above a
+    queue listing those same 21 as already read."""
+    add_person(db_conn, role_id, name="carol", where=ABROAD)  # read, genuinely fails
+    add_unread_person(db_conn, role_id, name="dave")
+    matching.score_role(role_id, now=NOW)
+
+    body = client.get(f"/roles/{role_id}").text
+    assert "Nobody has been read yet" not in body
+    assert "Nobody came through" in body
+
+
 def test_an_unread_candidate_is_not_reported_as_ruled_out(client, db_conn, role_id):
     """The bug this prevents: an unread candidate has no evidence, so every gate reads
     "no evidence for Python" and the recruiter is shown "No public sign of Python" —
     a claim about someone nobody looked at. 18 of 25 exclusions on the live role.
     """
     add_person(db_conn, role_id, name="alice", skills=("Python",))
-    add_person(db_conn, role_id, name="carol", skills=("Go",))  # read, genuinely fails
+    add_person(db_conn, role_id, name="carol", where=ABROAD)  # read, genuinely fails
     add_unread_person(db_conn, role_id, name="dave")  # never read
     matching.score_role(role_id, now=NOW)
 
@@ -282,7 +313,7 @@ def test_an_unread_candidate_is_not_reported_as_ruled_out(client, db_conn, role_
     # Bounded at the next heading: everything after it is the collection panel, which
     # lists unread people on purpose and is not part of the ruled-out reasoning.
     ruled_out_section = body.split("people we ruled out")[1].split("Read LinkedIn profiles")[0]
-    assert "carol" in ruled_out_section, "carol was read and does fail the must-have"
+    assert "carol" in ruled_out_section, "carol was read and is genuinely abroad"
     assert "dave" not in ruled_out_section, "dave was never read — that is not a reason"
     assert "No public sign of" not in body.split("people we ruled out")[0], (
         "no claim about a candidate's skills may appear above the ruled-out section"
@@ -863,6 +894,39 @@ def test_reading_everyone_never_exceeds_the_days_quota(
     )
     (payload, _), = enrich_jobs(db_conn)
     assert payload["limit"] == 1
+
+
+def test_people_picked_by_hand_are_read_from_either_side_of_the_gate(
+    client, db_conn, unread, ruled_out, can_read
+):
+    """The gate misreads location both ways, so a recruiter's ticks override it."""
+    db_conn.execute(
+        "insert into candidate_ref "
+        "(role_id, adapter, ref_kind, ref_value, snippet_raw, source_url, gate_state) "
+        "values (%s, 'linkedin_serp', 'linkedin_url', 'linkedin.com/in/unread-2', '{}', "
+        "'https://www.linkedin.com/in/unread-2/', 'passed')",
+        (unread,),
+    )
+    r = client.post(
+        f"/roles/{unread}/enrich",
+        data={"slugs": ["refused-1", "unread-2"]},
+        follow_redirects=False,
+    )
+    assert r.headers["location"].endswith("reading=started")
+
+    (payload, _), = enrich_jobs(db_conn)
+    # unread-1 passed the gate but was not ticked, so it is not in this run.
+    assert payload["scope"] == "all" and payload["limit"] == 2
+    assert sorted(payload["slugs"]) == ["refused-1", "unread-2"]
+
+
+def test_the_queue_offers_a_tick_box_for_the_ruled_out_too(
+    client, db_conn, unread, ruled_out, can_read
+):
+    body = client.get(f"/roles/{unread}").text
+    assert 'name="slugs" value="unread-1"' in body
+    assert 'name="slugs" value="refused-1"' in body
+    assert "Read the ticked ones" in body
 
 
 def test_an_unknown_scope_reads_only_the_people_who_passed(

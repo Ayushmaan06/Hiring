@@ -213,7 +213,7 @@ def plan(spec: RoleSpec) -> list[Query]:
     # ROLE_WORDS ("Engineer"/"Developer"/"SDE"...) only belongs in a skill query for a
     # role where those words are plausible titles — appending it for a business role
     # ANDs "Excel" against "Engineer OR Developer OR SDE", which matches nobody real.
-    role_clause = _or_clause(ROLE_WORDS) if expects_artifacts(spec.must_have_skills) else ""
+    role_clause = _or_clause(ROLE_WORDS) if expects_artifacts(spec.must_have_skills, spec.titles) else ""
 
     def assemble(core: str) -> str:
         return " ".join(p for p in ("site:linkedin.com/in/", core, region, extras) if p)

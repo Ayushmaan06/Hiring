@@ -47,7 +47,9 @@
   {% endif %}
 </p>
 
-{% if not kept and not progress.running and not_looked_at %}
+{# "Nobody has been read" only when that is true. With 21 read and all of them ruled
+   out it used to say this anyway, over a queue listing those 21 as already read. #}
+{% if not kept and not ruled_out and not progress.running and not_looked_at %}
   <div class="note warn">
     <strong>Nobody has been read yet.</strong>
     We found {{ progress.found }} people in the search and haven't read any profiles,

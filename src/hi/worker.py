@@ -303,6 +303,10 @@ async def handle_enrich(job: Job) -> None:
     gate_state = GATE_SCOPES[job.payload.get("scope") or "passed"]
 
     targets = lp.targets_for_role(role_id, gate_state=gate_state)
+    # Picked by hand from the queue: only these people, whichever side of the gate.
+    if slugs := job.payload.get("slugs"):
+        wanted = set(slugs)
+        targets = [t for t in targets if lp.slug_of(t[1]) in wanted]
     if not targets:
         set_note(job.id, "Everyone found for this role has already been read.")
         return

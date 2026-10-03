@@ -1121,6 +1121,10 @@ def waiting_for_role(role_id: uuid.UUID, gate_state: str | None = "passed") -> l
             "url": row["source_url"],
             "name": row["snippet_name"],
             "headline": row["snippet_headline"],
+            # Shown so a recruiter picking by hand can see the two things the gate gets
+            # wrong most: where someone is, and why the gate refused them.
+            "location": row["snippet_location"],
+            "gate_reason": row["gate_reason"],
             "enriched": row["candidate_id"] in seen,
         }
         for row in _by_promise(role_id, gate_state)

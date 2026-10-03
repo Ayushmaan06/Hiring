@@ -17,13 +17,24 @@ from datetime import datetime
 from hi.models import RoleSpec
 from hi.signals import BANNED_SIGNALS, FEATURE_ALLOWLIST, is_banned
 
-SCORER_VERSION = "scoring@1"
+# @2 (2026-10-02): scraped claims count in full, over-experience is not a penalty, and
+# the must-have gate needs one must-have on record rather than all of them.
+SCORER_VERSION = "scoring@2"
 
-# ARCHITECTURE.md §5.2. The whole product rests on these staying separate.
-TIER_MULTIPLIER = {"artifact_backed": 1.0, "third_party_stated": 0.6, "self_reported": 0.35}
+# ARCHITECTURE.md §2.4. What we scrape is taken as true, so every tier counts in full
+# toward the score. The tiers still stay separate everywhere else — in the evidence
+# table and on the candidate card ("proven" vs "says so") — so a recruiter can still see
+# which claims are backed by code. Scoring them at 0.35 capped every non-technical
+# candidate, who have no code to prove anything with, at "Weak".
+TIER_MULTIPLIER = {"artifact_backed": 1.0, "third_party_stated": 1.0, "self_reported": 1.0}
 
 # A nice-to-have skill contributes, but less than a must-have.
 NICE_TO_HAVE_WEIGHT = 0.4
+
+# Someone with none of the role's must-haves on record is listed, not ruled out, but
+# their score is cut to this fraction so they read Weak. Without it, experience alone
+# earned 0.40-0.55 ("Good"/"Strong") with no matching skill at all.
+NO_MUST_HAVE_FACTOR = 0.25
 
 # skill_depth is log-scaled so a prolific committer cannot dominate every shortlist:
 # a 200-commit repo is not 200x a 1-commit repo (ARCHITECTURE.md §5.2).
@@ -146,8 +157,17 @@ def evaluate_gates(spec: RoleSpec, evidence: list[Evidence], *, now: datetime) -
     gates: dict[str, str] = {}
     by_skill = _skill_evidence(evidence)
 
-    missing = [s for s in spec.must_have_skills if s not in by_skill]
-    gates["must_have_skills"] = "pass" if not missing else f"fail: no evidence for {', '.join(missing)}"
+    # Never rules anyone out (2026-10-02). Everyone we read is listed, and missing
+    # must-haves are paid for in the score instead — `skill_match`, and the
+    # NO_MUST_HAVE_FACTOR in `evaluate`. Requiring every must-have ruled out all 21
+    # people read for a 10-must-have business role; nobody lists ten skills on LinkedIn.
+    # The missing ones stay in the verdict so the card still shows them.
+    must = spec.must_have_skills
+    missing = [s for s in must if s not in by_skill]
+    gates["must_have_skills"] = (
+        "pass" if not missing
+        else f"pass: has {len(must) - len(missing)} of {len(must)}; no evidence for {', '.join(missing)}"
+    )
 
     if spec.remote in {"remote", "remote_relocate"}:
         gates["location"] = "pass: role is remote"
@@ -278,23 +298,14 @@ def seniority_fit(
     if years is None:
         return 0.0, "unknown"
 
-    lo, hi = spec.seniority.min_years, spec.seniority.max_years
-    if lo is None and hi is None:
+    # Only the minimum is scored. More experience than the role asks for is not a
+    # penalty (2026-10-02): a 3-6 year role scored a 25-year operations manager 0, and
+    # whether someone is "too senior" is the recruiter's call, not the ranking's.
+    # `max_years` is still shown on the role; it just never lowers a score.
+    lo = spec.seniority.min_years
+    if lo is None or years >= lo:
         return 1.0, basis
-    if lo is not None and hi is not None:
-        if lo <= years <= hi:
-            return 1.0, basis
-        distance = (lo - years) if years < lo else (years - hi)
-    elif lo is not None:
-        if years >= lo:
-            return 1.0, basis
-        distance = lo - years
-    else:
-        if years <= hi:
-            return 1.0, basis
-        distance = years - hi
-
-    return max(0.0, 1.0 - distance / SENIORITY_TOLERANCE_YEARS), basis
+    return max(0.0, 1.0 - (lo - years) / SENIORITY_TOLERANCE_YEARS), basis
 
 
 def activity_recency(evidence: list[Evidence], *, now: datetime) -> float:
@@ -339,7 +350,10 @@ def evaluate(
     )
 
     components = {k: round(min(1.0, max(0.0, v)), PRECISION) for k, v in sorted(components.items())}
-    score = round(sum(weights.get(k) * v for k, v in components.items()), PRECISION)
+    score = sum(weights.get(k) * v for k, v in components.items())
+    if spec.must_have_skills and not any(s in _skill_evidence(usable) for s in spec.must_have_skills):
+        score *= NO_MUST_HAVE_FACTOR
+    score = round(score, PRECISION)
 
     return MatchResult(
         score=score,

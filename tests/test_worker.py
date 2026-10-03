@@ -287,6 +287,25 @@ async def test_the_scope_decides_which_gate_verdicts_are_read(db_conn, monkeypat
     assert asked == ["passed", "failed", None]
 
 
+async def test_a_hand_picked_run_reads_only_the_people_ticked(db_conn, monkeypatch):
+    from hi.adapters import linkedin_profile as lp
+
+    monkeypatch.setattr(
+        lp,
+        "targets_for_role",
+        lambda _r, **kw: [(uuid.uuid4(), f"https://x/in/{s}/") for s in ("ann", "bob", "cat")],
+    )
+    read = []
+
+    async def record(targets, **kw):
+        read.extend(lp.slug_of(url) for _, url in targets)
+        return lp.EnrichResult()
+
+    monkeypatch.setattr(lp, "enrich", record)
+    await worker.handle_enrich(a_job(role_id=str(uuid.uuid4()), scope="all", slugs=["cat", "ann"]))
+    assert read == ["ann", "cat"]
+
+
 async def test_a_stopped_run_says_stopped_in_the_note(db_conn, monkeypatch):
     """Silent success is the characteristic LinkedIn failure — it must reach the page."""
     from hi.adapters import linkedin_profile as lp

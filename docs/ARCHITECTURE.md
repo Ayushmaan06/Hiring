@@ -166,10 +166,11 @@ column exists.
 programming language or framework among its must-haves gets the engineering profile;
 one naming only tools, practices, domains or qualifications gets the business profile
 (`canon.expects_artifacts`). No LLM is asked, and a recruiter can see why by reading the
-skill list. A role with **no** must-have skills keeps the engineering profile: scoring
-must not change on an absence of signal.
+skill list. ~~A role with **no** must-have skills keeps the engineering profile.~~
+*Superseded by §2.7: no must-haves now means business, and SQL/R alone no longer
+counts as code.*
 
-**The tier discount is not relaxed.** A listed skill still counts 0.35 against a proven
+~~**The tier discount is not relaxed.**~~ *Superseded by §2.7.* A listed skill still counts 0.35 against a proven
 one's 1.0. `third_party_stated` (0.6) is genuinely reachable for non-technical people —
 a company team page, a conference programme, a published interview — so removing the
 discount would remove the reason to go and find those. The honest long-term answer for
@@ -301,6 +302,48 @@ frees it with no janitor and no stale `running` row.
 
 **Still owed before hand-off:** the web process is now the only thing that must stay up, so it needs
 a restart policy. `ARCHITECTURE.md` §9a.5 gains that line.
+
+### 2.7 Scraped data is scored as true; scoring made tech-neutral (2026-10-02)
+
+Decided by the tool owner after "Senior Business / Operations Manager" ranked 9 of 10
+people at 0.00 — every one "Weak" — despite 8 of them having full, dated LinkedIn
+histories. The owner's rule: **whatever we scrape is taken as true.** Measured causes,
+all of which fell hardest on non-technical roles:
+
+1. **Tier discount.** `self_reported` counted 0.35 toward `skill_match`. Non-technical
+   people have nothing to prove a skill with, so they were capped by construction.
+   Now every tier counts 1.0 toward the score (`scoring.TIER_MULTIPLIER`).
+2. **Over-experience zeroed `seniority_fit`.** A 25-year operations manager on a 3–6
+   year role scored 0. Now only `min_years` is scored; more is never a penalty.
+   Whether someone is too senior is the recruiter's call.
+3. **Misclassified roles.** No must-haves meant engineering weights, and any "language"
+   meant engineering — so "Business & Strategy Associate" (SQL beside Excel and
+   PowerPoint) was scored *and searched* as an engineering role. Now the business
+   profile is the neutral default; `canon.ANALYST_LANGUAGES` (SQL, R, MATLAB, HTML,
+   CSS) count as code only when a title says engineer/developer ("Data Engineer").
+4. **The must-have gate needed every must-have.** "Business & Strategy Associate" has
+   10, and all 21 people read were ruled out — nobody lists ten skills on LinkedIn. Now
+   the must-have gate never rules anyone out: **everyone read is listed.** It records
+   "has 3 of 10; no evidence for …" so the card still shows what is missing; partial
+   coverage is paid for in `skill_match`, and someone with *none* of the must-haves has
+   their score multiplied by `NO_MUST_HAVE_FACTOR` (0.25) so they read Weak — the one
+   place the score is not the plain weighted sum. Location and activity can still rule
+   someone out. The page
+   also said "Nobody has been read yet" when everyone read had been ruled out; it now
+   says that only when it is true.
+
+**What does not change.** Tiers stay separate everywhere except the score: the
+`evidence.tier` column, the "proven" / "says so" split on the candidate card, and the
+§5.3 allowlist. On engineering roles public code still earns `skill_depth` and
+`activity_recency` on top. Scoring stays deterministic; `SCORER_VERSION` is
+`scoring@2`, and old `scoring@1` rows are kept. Pages read the `current_match` view
+(migration 015), the latest row per person per role, so a re-score never lists anyone
+twice.
+
+**Known consequence.** With over-experience free, meeting `min_years` alone earns 0.40
+under the business profile — exactly the "Good match" cut-off. On a role with
+must-haves `NO_MUST_HAVE_FACTOR` stops that; on a role with *only* nice-to-haves, someone
+with no matching skill can still read "Good match" on experience alone.
 
 ### Explicitly deleted from `Project-Doc.md`
 
@@ -580,13 +623,13 @@ Evaluated first; a failure excludes the candidate and records the reason in `gat
 
 | Component | Definition |
 |---|---|
-| `skill_match` | tier-weighted coverage of must + nice skills. Tier multipliers: `artifact_backed` 1.0, `third_party_stated` 0.6, `self_reported` 0.35 |
+| `skill_match` | coverage of must + nice skills. Every tier counts 1.0 since `scoring@2` (§2.7); was `artifact_backed` 1.0, `third_party_stated` 0.6, `self_reported` 0.35 |
 | `skill_depth` | per must-have skill, volume × recency of artifact evidence, log-scaled (a 200-commit repo is not 200× a 1-commit repo) |
-| `seniority_fit` | distance from `spec.seniority` midpoint using years **computed** from `linkedin_profile.experiences[]` `from_date`/`to_date` spans. Falls back to the old estimate (earliest artefact date) only when enrichment yielded no dates — and the card says which of the two it used. Never parsed from a title string (B5.4) |
+| `seniority_fit` | 1.0 at or above `spec.seniority.min_years`, decaying below it; more than `max_years` is not a penalty (§2.7). Years are **computed** from `linkedin_profile.experiences[]` `from_date`/`to_date` spans. Falls back to the old estimate (earliest artefact date) only when enrichment yielded no dates — and the card says which of the two it used. Never parsed from a title string (B5.4) |
 | `activity_recency` | exponential decay on the most recent `artifact_backed` evidence |
 | `availability` | public availability signal (GitHub `hireable`, profile-README statement). Unknown ⇒ **0**, never negative (B5.8) |
 
-**What the inversion does to `skill_match`, and why it is fine.** The spine is `self_reported`, so
+*Until `scoring@2` (§2.7), which removed the discount:* **What the inversion does to `skill_match`, and why it is fine.** The spine is `self_reported`, so
 most candidates carry a 0.35 multiplier on most skills and the absolute numbers compress downward.
 That is harmless — ranking is relative and every candidate is scaled identically. What matters is
 that the *spread* now comes almost entirely from `skill_depth` and from whichever skills the verify

@@ -105,14 +105,17 @@ def test_adding_evidence_never_lowers_the_score():
         previous = current
 
 
-def test_higher_tier_never_scores_lower():
+def test_a_scraped_claim_counts_as_much_as_a_proven_one_toward_skill_match():
+    """Scraped data is taken as true (ARCHITECTURE.md §2.4) — otherwise everyone
+    without public code is capped at Weak. The tiers stay visible on the card."""
     self_reported = evaluate(SPEC, [skill("Python", "self_reported")], now=NOW)
     third_party = evaluate(SPEC, [skill("Python", "third_party_stated")], now=NOW)
     artifact = evaluate(SPEC, [skill("Python", "artifact_backed")], now=NOW)
     assert (
         self_reported.components["skill_match"]
-        < third_party.components["skill_match"]
-        < artifact.components["skill_match"]
+        == third_party.components["skill_match"]
+        == artifact.components["skill_match"]
+        > 0
     )
 
 
@@ -123,7 +126,8 @@ def test_no_evidence_scores_zero_without_dividing_by_zero():
     result = evaluate(SPEC, [], now=NOW)
     assert result.score == 0.0
     assert all(v == 0.0 for v in result.components.values())
-    assert result.passed_gates is False
+    # Not ruled out: whether someone was read is `matching.shortlist`'s "checked", not a gate.
+    assert result.gates["must_have_skills"].startswith("pass: has 0 of 2")
 
 
 def test_spec_with_no_skills_does_not_divide_by_zero():
@@ -183,11 +187,27 @@ def test_education_claim_type_is_ignored():
 # --- gates are recorded, not silently dropped --------------------------------
 
 
-def test_missing_must_have_fails_the_gate_with_a_reason():
-    result = evaluate(SPEC, [skill("Python"), location()], now=NOW)
-    assert result.gates["must_have_skills"].startswith("fail")
+def test_none_of_the_must_haves_is_listed_but_scored_weak():
+    """Everyone we read is listed. No must-have on record cuts the score, not the person."""
+    from hi.config import settings
+
+    experienced = [skill("Go"), location(), years(10.0)]
+    result = evaluate(SPEC, experienced, now=NOW)
+    assert result.passed_gates is True
+    assert result.gates["must_have_skills"].startswith("pass: has 0 of 2")
     assert "PostgreSQL" in result.gates["must_have_skills"]
-    assert result.passed_gates is False
+    assert result.score < settings.match_possible_min, "must read Weak"
+    assert result.score < evaluate(SPEC, experienced + [skill("Python")], now=NOW).score
+
+
+def test_some_of_the_must_haves_passes_but_says_what_is_missing():
+    """Nobody lists ten skills on LinkedIn; partial coverage costs in skill_match instead."""
+    partial = evaluate(SPEC, [skill("Python"), location()], now=NOW)
+    full = evaluate(SPEC, [skill("Python"), skill("PostgreSQL"), location()], now=NOW)
+    assert partial.passed_gates is True
+    assert partial.gates["must_have_skills"].startswith("pass: has 1 of 2")
+    assert "PostgreSQL" in partial.gates["must_have_skills"]
+    assert partial.score < full.score
 
 
 def test_another_indian_city_passes_the_gate_with_the_mismatch_shown():
@@ -300,17 +320,22 @@ def test_unknown_seniority_is_zero_not_a_guess():
     assert result.components["seniority_fit"] == 0.0
 
 
-def test_years_outside_the_range_decay_rather_than_snap_to_zero():
-    inside = Evidence(claim_type="experience_years", tier="self_reported", value_num=6.0, source_url="https://x")
-    just_over = Evidence(claim_type="experience_years", tier="self_reported", value_num=9.0, source_url="https://x")
-    far_over = Evidence(claim_type="experience_years", tier="self_reported", value_num=20.0, source_url="https://x")
+def years(n: float) -> Evidence:
+    return Evidence(claim_type="experience_years", tier="self_reported", value_num=n, source_url="https://x")
 
-    a = evaluate(SPEC, [inside], now=NOW).components["seniority_fit"]
-    b = evaluate(SPEC, [just_over], now=NOW).components["seniority_fit"]
-    c = evaluate(SPEC, [far_over], now=NOW).components["seniority_fit"]
-    assert a == 1.0
-    assert 0.0 < b < 1.0
-    assert c == 0.0
+
+def test_too_few_years_decays_rather_than_snaps_to_zero():
+    """SPEC asks for 4-8 years."""
+    fit = lambda n: evaluate(SPEC, [years(n)], now=NOW).components["seniority_fit"]
+    assert fit(6.0) == 1.0
+    assert 0.0 < fit(2.0) < 1.0
+    assert fit(0.0) == 0.0
+
+
+def test_more_years_than_the_role_asks_for_is_not_a_penalty():
+    """A 25-year manager on a 3-6 year role scored 0. Too senior is the recruiter's call."""
+    fit = lambda n: evaluate(SPEC, [years(n)], now=NOW).components["seniority_fit"]
+    assert fit(9.0) == fit(20.0) == fit(40.0) == 1.0
 
 
 # --- golden value (catches accidental weight drift) --------------------------
@@ -345,6 +370,6 @@ def test_golden_candidate_scores_exactly():
 
 
 def test_scorer_version_is_pinned():
-    assert scoring.SCORER_VERSION == "scoring@1"
+    assert scoring.SCORER_VERSION == "scoring@2"
     assert DEFAULT_WEIGHTS.version == "v1"
     assert set(DEFAULT_WEIGHTS.values) == set(FEATURE_ALLOWLIST)

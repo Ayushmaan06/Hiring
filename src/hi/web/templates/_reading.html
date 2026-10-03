@@ -156,14 +156,21 @@ python -m hi.worker</pre>
 </details>
 {% endif %}
 
+{# Picking by hand. The gate reads location off a search snippet and gets it wrong both
+   ways, so the recruiter can tick exactly who to read from either side of it. #}
+{% set can_pick = (collect_todo or collect_refused) and collect_budget and not reading_now and not reading_off %}
 <details style="margin-top:16px">
-  <summary>The queue &mdash; {{ collect_todo|length }} waiting, {{ collect_done|length }} read</summary>
+  <summary>The queue &mdash; {{ collect_todo|length }} waiting,
+    {% if collect_refused %}{{ collect_refused|length }} ruled out, {% endif %}{{ collect_done|length }} read{% if can_pick %} &middot; pick who to read by hand{% endif %}</summary>
+  <form method="post" action="/roles/{{ role_id }}/enrich">
   <table style="margin-top:10px">
-    <tr><th>#</th><th>Name</th><th>LinkedIn</th><th>Status</th></tr>
+    <tr>{% if can_pick %}<th></th>{% endif %}<th>#</th><th>Name</th><th>Location</th><th>LinkedIn</th><th>Status</th></tr>
     {% for p in collect_todo %}
     <tr>
+      {% if can_pick %}<td><input type="checkbox" name="slugs" value="{{ p.slug }}" aria-label="Read {{ p.name or p.slug }}"></td>{% endif %}
       <td class="muted">{{ loop.index }}</td>
       <td>{{ p.name or "&mdash;" }}</td>
+      <td class="muted">{{ p.location or "&mdash;" }}</td>
       <td><a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.slug }}</a></td>
       <td>
         {% if loop.index <= collect_default %}<span class="badge badge-proven">next run</span>
@@ -171,14 +178,34 @@ python -m hi.worker</pre>
       </td>
     </tr>
     {% endfor %}
-    {% for p in collect_done %}
-    <tr class="row-acted">
+    {% for p in collect_refused %}
+    <tr>
+      {% if can_pick %}<td><input type="checkbox" name="slugs" value="{{ p.slug }}" aria-label="Read {{ p.name or p.slug }}"></td>{% endif %}
       <td class="muted">&mdash;</td>
       <td>{{ p.name or "&mdash;" }}</td>
+      <td class="muted">{{ p.location or "&mdash;" }}</td>
+      <td><a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.slug }}</a></td>
+      <td><span class="muted">ruled out: {{ plain_reason(p.gate_reason or "") }}</span></td>
+    </tr>
+    {% endfor %}
+    {% for p in collect_done %}
+    <tr class="row-acted">
+      {% if can_pick %}<td></td>{% endif %}
+      <td class="muted">&mdash;</td>
+      <td>{{ p.name or "&mdash;" }}</td>
+      <td class="muted">{{ p.location or "&mdash;" }}</td>
       <td><a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.slug }}</a></td>
       <td><span class="badge badge-said">already read</span></td>
     </tr>
     {% endfor %}
   </table>
+  {% if can_pick %}
+  <p style="margin-top:10px">
+    <button class="btn">Read the ticked ones</button>
+    <span class="hint">Up to {{ collect_budget }} today. Ticked people join the same ranking
+      as everyone else, whether the search kept them or not.</span>
+  </p>
+  {% endif %}
+  </form>
 </details>
 </section>

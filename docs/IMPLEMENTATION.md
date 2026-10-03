@@ -623,6 +623,15 @@ a person read this way can still rank as ruled out on real evidence. What change
 opened it" stops being permanent. Reading one also removes them from the "we did not open" list,
 which otherwise claimed we had not opened a profile we had just read.
 
+**Picking by hand, 2026-10-02** (owner's request). The gate reads location off a snippet and gets
+it wrong in both directions — people abroad kept, people in India refused — so neither "the kept"
+nor "everyone" is the set a recruiter wants. The queue table now lists both sides of the gate with
+location and the gate's reason, each with a tick box; **Read the ticked ones** posts `slugs=[...]`
+to the same `/enrich` endpoint. A non-empty `slugs` forces `scope=all` and narrows the todo list to
+those slugs, and the payload carries only the slugs the budget covers, so the job names exactly
+who it reads. `handle_enrich` filters `targets_for_role` to the same slugs. Same cap, lock, pacing
+and preflight; the read people land in the same ranking as everyone else.
+
 **Mode C still ships disabled.** A fresh database refuses every read (migration 010) and the page
 says so; `python -m hi.adapters.linkedin_profile enable` is still the only way to turn it on. The
 button changed who *starts* a read, not whose account carries the risk.

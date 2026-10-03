@@ -797,8 +797,9 @@ def test_a_listed_skill_is_self_reported_never_proven():
         assert r.value_num is None, "no volume without an artefact to measure"
 
 
-def test_listed_skills_score_but_score_less_than_proven_ones():
-    """The answer to 'GitHub should be optional': it is a multiplier, not a gate."""
+def test_listed_skills_match_in_full_and_code_still_adds_depth():
+    """Scraped data is taken as true, so a listed skill matches as fully as a proven one.
+    On an engineering role, public code still earns `skill_depth` on top of that."""
     from datetime import datetime, timezone
 
     from hi.models import RoleSpec
@@ -815,12 +816,13 @@ def test_listed_skills_score_but_score_less_than_proven_ones():
             )
         ]
 
-    listed = evaluate(spec, ev("self_reported"), now=now).components["skill_match"]
-    proven = evaluate(spec, ev("artifact_backed", 100_000.0), now=now).components["skill_match"]
-    nothing = evaluate(spec, [], now=now).components["skill_match"]
+    listed = evaluate(spec, ev("self_reported"), now=now)
+    proven = evaluate(spec, ev("artifact_backed", 100_000.0), now=now)
+    nothing = evaluate(spec, [], now=now)
 
-    assert nothing == 0.0
-    assert 0.0 < listed < proven, "a LinkedIn-only candidate must still be rankable"
+    assert nothing.components["skill_match"] == 0.0
+    assert listed.components["skill_match"] == proven.components["skill_match"] == 1.0
+    assert listed.score < proven.score, "public code is still extra evidence of depth"
 
 
 # --- the employer regression --------------------------------------------------

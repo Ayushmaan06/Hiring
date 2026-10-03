@@ -496,6 +496,7 @@ def start_reading(
     role_id: uuid.UUID,
     limit: int = Form(1),
     scope: str = Form("passed"),
+    slugs: list[str] = Form([]),
 ):
     """Read the next few LinkedIn profiles for this role (IMPLEMENTATION.md 1.11d).
 
@@ -519,6 +520,11 @@ def start_reading(
     # An unknown scope reads the gate's own answer rather than guessing wider: a typo in
     # a form field must never spend the day's quota on people the gate refused.
     gate_state = worker.GATE_SCOPES.get(scope, "passed")
+    # Ticked by hand in the queue. The gate gets location wrong both ways, so a person
+    # the recruiter looked at and chose is read whichever side of the gate they are on.
+    picked = {s.strip().lower() for s in slugs if s.strip()}
+    if picked:
+        gate_state = None
 
     if lp.policy_blocked():
         return back("off")
@@ -531,13 +537,19 @@ def start_reading(
         return back("busy")
 
     todo = [p for p in lp.waiting_for_role(role_id, gate_state) if not p["enriched"]]
+    if picked:
+        todo = [p for p in todo if p["slug"] in picked]
+        limit = len(todo)
     if not todo:
         return back("nobody")
 
     # Never queue a number the run would silently truncate.
     count = max(1, min(limit, len(todo), lp.budget_remaining()))
     payload = {"role_id": str(role_id), "limit": count}
-    if gate_state != "passed":
+    if picked:
+        # Only the ones the budget covers, so the job names exactly who it will read.
+        payload |= {"scope": "all", "slugs": [p["slug"] for p in todo[:count]]}
+    elif gate_state != "passed":
         payload["scope"] = scope
     if worker.enqueue("enrich", payload) is None:
         return back("busy")

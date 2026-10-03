@@ -24,7 +24,13 @@ def role_id(db_conn):
     return discovery.create_role("Backend Engineer", SPEC)
 
 
-def attach_candidate(db_conn, role_id, *, name, ref_value, region="IN-KA-BLR", skills=("Python",)):
+def attach_candidate(
+    db_conn, role_id, *, name, ref_value, region="IN-KA-BLR", skills=("Python",), abroad=None
+):
+    """`abroad` is a location string outside India — the way to be ruled out, now that
+    missing skills only lower the score."""
+    if abroad:
+        region = None
     candidate_id = uuid.uuid4()
     db_conn.execute(
         "insert into candidate (id, display_name, location_region) values (%s, %s, %s)",
@@ -55,10 +61,10 @@ def attach_candidate(db_conn, role_id, *, name, ref_value, region="IN-KA-BLR", s
         EvidenceRow(
             claim_type="location",
             claim_key=region,
-            claim_value=region,
+            claim_value=abroad or region,
             tier="self_reported",
             source_url=f"https://github.com/{name}",
-            snippet=f"Location: {region}",
+            snippet=f"Location: {abroad or region}",
             extractor="test",
             extractor_version="test@1",
         )
@@ -118,10 +124,11 @@ def test_gates_json_records_the_seniority_basis(db_conn, role_id):
 
 
 def test_shortlist_is_ranked_and_hides_excluded_by_default(db_conn, role_id):
-    # alice has the must-have; carol does not, so carol fails a gate.
+    # carol lives abroad, so carol fails a gate.
     attach_candidate(db_conn, role_id, name="alice", ref_value="linkedin.com/in/alice")
     attach_candidate(
-        db_conn, role_id, name="carol", ref_value="linkedin.com/in/carol", skills=("Go",)
+        db_conn, role_id, name="carol", ref_value="linkedin.com/in/carol",
+        abroad="Austin, Texas, United States",
     )
     matching.score_role(role_id, now=NOW)
 
@@ -133,7 +140,15 @@ def test_shortlist_is_ranked_and_hides_excluded_by_default(db_conn, role_id):
     # Excluded candidates are available, never silently dropped.
     carol = next(r for r in everyone if r["display_name"] == "carol")
     assert carol["passed_gates"] is False
-    assert "fail" in carol["gates_json"]["must_have_skills"]
+    assert "fail" in carol["gates_json"]["location"]
+
+
+def test_someone_with_none_of_the_must_haves_is_listed_last_not_hidden(db_conn, role_id):
+    attach_candidate(db_conn, role_id, name="alice", ref_value="linkedin.com/in/alice")
+    attach_candidate(db_conn, role_id, name="gopher", ref_value="linkedin.com/in/gopher", skills=("Go",))
+    matching.score_role(role_id, now=NOW)
+
+    assert [r["display_name"] for r in matching.shortlist(role_id)] == ["alice", "gopher"]
 
 
 def test_shortlist_orders_by_score_descending(db_conn, role_id):
@@ -235,9 +250,47 @@ def test_a_mixed_role_is_treated_as_engineering(db_conn):
     assert matching.weights_profile_for(spec) == matching.ENGINEERING_PROFILE
 
 
-def test_a_role_with_no_must_haves_does_not_switch_profile(db_conn):
-    """Scoring must not change on an absence of signal."""
-    assert matching.weights_profile_for(RoleSpec()) == matching.ENGINEERING_PROFILE
+def test_a_role_with_no_must_haves_gets_the_neutral_profile(db_conn):
+    """Engineering weights on a skill-less role put 40% of the score out of everyone's
+    reach — "Senior Business / Operations Manager" ranked all 10 people Weak."""
+    spec = RoleSpec(titles=["Senior Business / Operations Manager"])
+    assert matching.weights_profile_for(spec) == matching.BUSINESS_PROFILE
+
+
+def test_sql_beside_business_skills_is_still_a_business_role(db_conn):
+    """Analysts list SQL. It must not flip a business role to engineering weights."""
+    spec = RoleSpec(
+        titles=["Business & Strategy Associate"],
+        must_have_skills=["Business Strategy", "Excel", "PowerPoint", "SQL"],
+    )
+    assert matching.weights_profile_for(spec) == matching.BUSINESS_PROFILE
+
+
+def test_sql_on_an_engineering_title_is_still_engineering(db_conn):
+    spec = RoleSpec(titles=["Data Engineer"], must_have_skills=["SQL"])
+    assert matching.weights_profile_for(spec) == matching.ENGINEERING_PROFILE
+
+
+def test_rescoring_under_a_new_version_does_not_list_anyone_twice(db_conn, monkeypatch):
+    """`match` keeps one row per version; the shortlist must show only the latest."""
+    from hi import discovery, scoring
+
+    role_id = discovery.create_role("Ops", RoleSpec(titles=["Ops Manager"]))
+    candidate_id = uuid.uuid4()
+    db_conn.execute("insert into candidate (id, display_name) values (%s, 'Ann')", (candidate_id,))
+    db_conn.execute(
+        "insert into candidate_ref (role_id, adapter, ref_kind, ref_value, snippet_raw, "
+        "source_url, gate_state, candidate_id) values (%s, 'linkedin_serp', 'linkedin_url', "
+        "'linkedin.com/in/ann', '{}', 'https://www.linkedin.com/in/ann/', 'passed', %s)",
+        (role_id, candidate_id),
+    )
+    matching.score_role(role_id)
+    monkeypatch.setattr(scoring, "SCORER_VERSION", "scoring@test-next")
+    matching.score_role(role_id)
+
+    assert db_conn.execute("select count(*) from match where role_id = %s", (role_id,)).fetchone()[0] == 2
+    rows = matching.shortlist(role_id, include_excluded=True)
+    assert [r["scorer_version"] for r in rows] == ["scoring@test-next"]
 
 
 def test_every_profile_sums_to_one(db_conn):
@@ -271,15 +324,13 @@ def test_a_business_candidate_can_reach_a_strong_match(db_conn):
     under_v1 = scoring.evaluate(spec, evidence, matching.active_weights("engineering"), now=NOW)
     under_business = scoring.evaluate(spec, evidence, matching.weights_for_role(spec), now=NOW)
 
-    assert under_v1.score < settings.match_strong_min, "the ceiling this change exists to lift"
     assert under_business.score > under_v1.score
-    assert under_business.score >= settings.match_good_min
+    assert under_business.score >= settings.match_strong_min
 
 
-def test_the_tier_discount_is_not_relaxed_by_the_business_profile(db_conn):
-    """A listed skill must still count less than a proven one — third_party_stated is
-    reachable for non-technical people, so the incentive to verify has to survive.
-    """
+def test_a_listed_skill_scores_the_same_as_a_proven_one(db_conn):
+    """Scraped data is taken as true (ARCHITECTURE.md §2.4). Reverses the 2026-08-27
+    tier discount, which capped every non-technical candidate at Weak."""
     spec = RoleSpec(must_have_skills=["Financial Modeling"])
     weights = matching.weights_for_role(spec)
 
@@ -289,10 +340,9 @@ def test_the_tier_discount_is_not_relaxed_by_the_business_profile(db_conn):
             [Evidence(claim_type="skill", claim_key="Financial Modeling",
                       claim_value="Financial Modeling", tier=tier, observed_at=NOW)],
             weights, now=NOW,
-        ).score
+        ).components["skill_match"]
 
-    assert score_with("self_reported") < score_with("third_party_stated")
-    assert score_with("third_party_stated") < score_with("artifact_backed")
+    assert score_with("self_reported") == score_with("third_party_stated") == score_with("artifact_backed") == 1.0
 
 
 def test_the_score_records_which_profile_produced_it(db_conn):
